@@ -30,3 +30,7 @@ dist-ssr
 
 # agent scratch (never committed)
 .scratch/
+
+# Playwright output
+test-results/
+playwright-report/
