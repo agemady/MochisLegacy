@@ -36,8 +36,8 @@ export default function Header() {
           className="flex items-center gap-2 rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-700"
         >
           <Heart className="h-4 w-4" aria-hidden />
-          <span className="hidden xs:inline sm:inline">Join the squad</span>
-          <span className="xs:hidden sm:hidden">Join</span>
+          <span className="hidden sm:inline">Join the squad</span>
+          <span className="sm:hidden">Join</span>
         </a>
       </div>
     </header>
