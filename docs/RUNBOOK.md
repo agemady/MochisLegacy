@@ -33,28 +33,12 @@ Change the word, save, and redeploy — the badge on the card updates by itself.
 
 ## Connect the forms to Supabase
 
-The signup forms need two secrets set in **Cloudflare Pages → your project → Settings → Environment variables** (add them to *both* Production and Preview):
-
-| Name | Where to find it |
-| --- | --- |
-| `VITE_SUPABASE_URL` | Supabase dashboard → Project Settings → API → Project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase dashboard → Project Settings → API → anon public key |
-
-After adding or changing them, **redeploy** — the site only picks them up at build time, not on the fly.
+The two `VITE_SUPABASE_*` secrets go into Cloudflare Pages (both Production and Preview), then redeploy. Step-by-step: [DEPLOY.md](DEPLOY.md) → **Environment variables**.
 
 ## Read and export signups
 
-Submissions land in the Supabase dashboard → **Table Editor**:
-
-- `dog_applications` — "I have a dog" signups
-- `volunteer_applications` — "I want to volunteer" signups
-- `donation_pledges` — "I want to support" pledges
-- `subscribers` — newsletter emails
-
-To export: open the table, click the **⋯ (kebab) menu** at the top of the table, choose **Export to CSV**, and the file downloads.
+Submissions land in four tables in the Supabase dashboard (Table Editor); export any of them via the ⋯ menu → **Export CSV**. Details: [supabase/README.md](../supabase/README.md).
 
 ## Demo mode (when the secrets are missing)
 
-If `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` aren't set, the forms still "work" — but they save **nothing, anywhere**, and the confirmation says "Demo mode."
-
-That's handy for testing the site, but it means: **if you deploy without the two secrets, real signups are not collected.** If you're ever unsure whether a submission was saved, check the tables above — the table is the truth.
+Without the two secrets, form submissions are **not saved anywhere** — a production deploy without them collects no signups. If you're ever unsure whether a submission was saved, check the tables in the Supabase dashboard — the table is the truth.

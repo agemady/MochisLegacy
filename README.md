@@ -9,7 +9,7 @@ Landing page (single screen) for **Mochi's Legacy**, a therapy dog nonprofit bas
 - [Vite](https://vite.dev) + React + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
 - [lucide-react](https://lucide.dev) (icons)
-- [Supabase](https://supabase.com) (Postgres + auth; schema in [`supabase/schema.sql`](supabase/schema.sql))
+- [Supabase](https://supabase.com) (Postgres + auth — database setup and data export: [`supabase/README.md`](supabase/README.md))
 
 ## Quickstart
 
@@ -39,8 +39,8 @@ If the Supabase variables are unset, signup forms run in **demo mode**: submissi
 
 ## Windows build note
 
-Vite 8 (rolldown), lightningcss, and Tailwind v4 (oxide) load platform-specific native binaries. npm can silently skip these optional transitive dependencies ([npm/cli#4828](https://github.com/npm/cli/issues/4828)), so the Windows x64 binaries are pinned as `devDependencies` — do not remove them.
+Vite 8 (rolldown), lightningcss, and Tailwind v4 (oxide) need platform-specific native binaries; the Windows x64 ones are declared as `optionalDependencies` in `package.json` so Linux builders skip them ([npm/cli#4828](https://github.com/npm/cli/issues/4828)). Do not remove them.
 
 ## Deployment
 
-Target: **Cloudflare Pages** connected to `main` — build command `npm run build`, output directory `dist`. Production domain: [mochislegacy.com](https://mochislegacy.com).
+Cloudflare Pages → [mochislegacy.com](https://mochislegacy.com). Setup, env vars, and domain: [docs/DEPLOY.md](docs/DEPLOY.md).
