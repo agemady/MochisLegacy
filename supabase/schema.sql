@@ -14,6 +14,8 @@ create table if not exists public.dog_applications (
   age         text,
   city        text,
   notes       text,
+  status      text not null default 'new'
+              check (status in ('new','contacted','approved','archived')),
   created_at  timestamptz not null default now()
 );
 
@@ -25,6 +27,8 @@ create table if not exists public.volunteer_applications (
   skills        text[] not null default '{}',
   interests     text,
   availability  text,
+  status        text not null default 'new'
+                check (status in ('new','contacted','approved','archived')),
   created_at    timestamptz not null default now()
 );
 
@@ -38,6 +42,8 @@ create table if not exists public.donation_pledges (
   visit_request  text,
   message        text,
   deductible     boolean not null default false,
+  status         text not null default 'new'
+                 check (status in ('new','contacted','approved','archived')),
   created_at     timestamptz not null default now()
 );
 
@@ -46,6 +52,22 @@ create table if not exists public.subscribers (
   email       text not null unique,
   created_at  timestamptz not null default now()
 );
+
+alter table public.dog_applications
+  add column if not exists status text not null default 'new'
+  check (status in ('new','contacted','approved','archived'));
+alter table public.volunteer_applications
+  add column if not exists status text not null default 'new'
+  check (status in ('new','contacted','approved','archived'));
+alter table public.donation_pledges
+  add column if not exists status text not null default 'new'
+  check (status in ('new','contacted','approved','archived'));
+
+create index if not exists dog_apps_created_at_idx on public.dog_applications (created_at desc);
+create index if not exists dog_apps_email_idx on public.dog_applications (email);
+create index if not exists vol_apps_created_at_idx on public.volunteer_applications (created_at desc);
+create index if not exists vol_apps_email_idx on public.volunteer_applications (email);
+create index if not exists pledges_created_at_idx on public.donation_pledges (created_at desc);
 
 alter table public.dog_applications       enable row level security;
 alter table public.volunteer_applications enable row level security;
@@ -91,6 +113,8 @@ begin
   return v_email;
 end;
 $$;
+
+drop function if exists public.public_submit_dog_signup;
 
 create or replace function public.public_submit_dog_signup(
   p_owner_name text,
@@ -142,6 +166,8 @@ begin
 end;
 $$;
 
+drop function if exists public.public_submit_volunteer;
+
 create or replace function public.public_submit_volunteer(
   p_name         text,
   p_email        text,
@@ -183,6 +209,8 @@ begin
   return v_id;
 end;
 $$;
+
+drop function if exists public.public_submit_pledge;
 
 create or replace function public.public_submit_pledge(
   p_name          text,
@@ -232,6 +260,8 @@ begin
   return v_id;
 end;
 $$;
+
+drop function if exists public.public_subscribe;
 
 create or replace function public.public_subscribe(
   p_email text
