@@ -3,8 +3,8 @@ import { PawPrint } from "lucide-react";
 
 /**
  * LineupPlaceholder — hero-photo frame for the founder's lineup portrait.
- * Renders /lineup.png when present; otherwise a dashed slot. Caption copy
- * stays the ruling-8 fallback until the design review lands new words.
+ * Renders /lineup.png when present; otherwise a dashed slot. Empty-slot paw
+ * tilts on hover (motion-safe); deletes itself once the portrait lands.
  */
 export default function LineupPlaceholder() {
   const [hasArt, setHasArt] = useState(true);
@@ -15,18 +15,21 @@ export default function LineupPlaceholder() {
         {hasArt ? (
           <img
             src="/lineup.png"
-            alt="The Mochi's Legacy kickoff dog squad, drawn as a superhero team lineup"
+            alt="The Mochi's Legacy kickoff squad portrait."
             className="h-full w-full object-cover"
             onError={() => setHasArt(false)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-amber-300 bg-amber-50/70">
-            <PawPrint className="h-8 w-8 text-amber-400" aria-hidden />
+          <div className="group flex h-full w-full items-center justify-center border-2 border-dashed border-amber-300 bg-amber-50/70">
+            <PawPrint
+              aria-hidden
+              className="h-8 w-8 text-amber-400 motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:rotate-12"
+            />
           </div>
         )}
       </div>
       <figcaption className="mt-2 text-sm text-stone-500">
-        The full squad portrait goes here.
+        The kickoff squad — come meet them October 2.
       </figcaption>
     </figure>
   );

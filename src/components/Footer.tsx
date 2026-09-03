@@ -7,7 +7,7 @@ import Newsletter from "./forms/Newsletter";
  */
 export default function Footer() {
   return (
-    <footer className="border-t border-amber-200/70 bg-amber-50">
+    <footer className="border-t border-amber-200/70 bg-transparent">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <p className="text-center text-sm text-stone-500">
           In memory of Mochi · Not yet a 501(c)(3), so pledges are not

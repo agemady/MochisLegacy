@@ -55,3 +55,21 @@ Pane `w2:p9`. Paths: `Hero.tsx`, `LineupPlaceholder.tsx`, `src/index.css`. Heade
 Held for copy review: two-sentence Mochi story, warm kickoff invite, “what we do” line.
 
 Fold: extra paw (~24px) + larger H1 (~12–24px) + caption (~24px) ≈ 510px to first-button bottom at 390 — still inside a tall-phone viewport.
+
+---
+
+# Ruling 9 — copy + rest of feel-good (Part 3)
+
+Pane `w2:p9`. Paths: `Hero.tsx`, `LineupPlaceholder.tsx`, `Footer.tsx`, `src/index.css`. Buttons unchanged (solid + two outline). No new deps. p3 owns the Fraunces `<link>` in `index.html`; `--font-display` falls back to Georgia.
+
+| Item | What landed |
+|---|---|
+| H1 face | `font-display` → `"Fraunces", Georgia, serif`. |
+| Page wash | Static top-down amber→cream on `html`; `#root > .min-h-screen` transparent so p1's `bg-amber-50` doesn't hide it. Footer `bg-transparent`. |
+| Paw | One `h-56` watermark at `opacity-5` behind the mission/story block. Glyph above the H1 removed. |
+| Story | Under the mission, she/her: `One very good golden retriever showed us how much a visit from a dog can mean. Mochi's Legacy keeps her at work, through every wagging team that follows.` |
+| What we do | `We organize volunteer handler-and-dog teams to visit senior living communities, schools, and libraries.` |
+| Kickoff | Invitation block; `October 2` in `font-semibold`. |
+| Caption | `The kickoff squad — come meet them October 2.` |
+| Alt | `The Mochi's Legacy kickoff squad portrait.` (no superhero wording). |
+| Empty-slot paw | `group-hover:rotate-12` behind `motion-safe:`. |
