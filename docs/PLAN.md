@@ -17,14 +17,16 @@ Living plan, partitioned into small slices. One slice = one owner = disjoint pat
 | L-modal-cut | landing | p4 | Ruling 12: native `<dialog>`, hoisted submit state, uncontrolled amount; release `Newsletter.tsx` to p9 |
 | L-chrome-cut | landing | p9 | Ruling 12: inline LineupPlaceholder + Newsletter, buttons from array, delete `Header.tsx`, CSS + comment cleanup; then L-og |
 | L-app-cut | landing | p1 | Remove `<Header />` from App, Roster keeps its own back link; modal hash matching exact only; then S-shell |
-| L-lib | landing | p7 | Finish ruling 10 items; remove `isSupabaseConfigured` if unused; then L-lazy |
-| L-docs-cut | landing | p3 | README / RUNBOOK / DEPLOY / supabase README: delete duplicated sections, one home per fact; add `og:image` once `public/og.png` exists |
-| L-e2e | landing | pF | landing.spec.ts, screenshots.spec.ts, `npm run shots` |
-| S-schema | sched | pG | Ruling 11 `supabase/schedule.sql`: four tables, RLS, owner/admin policies, seed comment for the Oct 2 walk |
-| S-seed | sched | pH | `supabase/schedule-seed.sql` template: Oct 2 walk row, example people/dogs rows for the 11 kickoff dogs with placeholder emails, instructions |
-| S-tiers | sched | pD | tiers.ts + tests (then S-rsvp-ui) |
-| S-checkin | sched | pE | checkin.ts + tests (then S-checkin-ui) |
-| S-design-cut | sched | pB | Rewrite `docs/scheduling/DESIGN.md` to ruling 11 (delete cut sections; keep goals, 4 tables, 2 screens, auth, open questions) |
+| L-lazy | landing | p7 | Dynamic-import supabase-js on first submit (ruling 10 lib items all landed: f08825b 7aa4130 6ea4204 5a27f6a 288364e) |
+| L-docs-cut | landing | p3 | Docs de-dup; vitest excludes `e2e/**`; `og` script; gitignore Playwright output; `og:image` once `public/og.png` exists |
+| L-e2e | landing | pF | landing.spec.ts, screenshots.spec.ts → `.scratch/shots/` (restarted 07:45Z) |
+| S-verify | sched | pG | `supabase/schedule-verify.sql` (schema landed 084ca5f); then S-roster-db |
+| S-data | sched | pH | `src/lib/schedule.ts` typed data layer + in-memory demo fixtures; signatures on the board |
+| S-rsvp-ui | sched | pD | `/schedule` page against `schedule.ts` (tiers landed 435e63d) |
+| S-checkin-ui | sched | pE | `/checkin` page against `schedule.ts` + `checkin.ts` |
+| R-schedule-sql | review | pA | RLS/security review of `schedule.sql` → `.scratch/review-schedule-sql.md` |
+| R-schedule-design | review | p6 | Screen-by-screen brief for pD/pE → `.scratch/design-schedule.md` |
+| S-design-cut | sched | pB | Done 939467e (DESIGN.md at 81 lines); pane retired |
 
 ## Older in-progress table (superseded)
 

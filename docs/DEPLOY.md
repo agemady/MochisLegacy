@@ -56,11 +56,7 @@ Optional: bulk-redirect `<project>.pages.dev` → `https://mochislegacy.com` so 
 - Confirm a signup from the live page lands in Supabase (or demo-mode is **off** — env vars must be present on the **Production** environment).
 - Preview deployments use Preview env vars; give them the same Supabase project unless you stand up a staging project.
 
-## 5. Linux build note
-
-Pages builders are Linux. The `*-win32-x64-msvc` packages in `package.json` are a local Windows workaround and must not be required on the builder. If a Pages build fails resolving those packages, tell the overseer — do not edit `package.json` from this lane.
-
-## 6. Local check before asking for a push
+## 5. Local check before asking for a push
 
 ```bash
 npm run build

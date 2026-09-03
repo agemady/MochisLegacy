@@ -1,17 +1,43 @@
-import { Dog, HandHeart, HeartHandshake, PawPrint } from "lucide-react";
-import LineupPlaceholder from "./LineupPlaceholder";
+import { useState } from "react";
+import { Dog, HandHeart, HeartHandshake, PawPrint, type LucideIcon } from "lucide-react";
 import type { SignupKind } from "./forms/SignupModal";
 
 interface HeroProps {
-  /** Opens p4's SignupModal with the chosen form kind. */
   onOpen: (kind: SignupKind) => void;
 }
 
-/** Equal height; lift is motion-safe only. Primary stays solid amber. */
 const btn =
   "flex h-12 w-full items-center justify-center gap-2.5 rounded-full border-2 px-6 text-base font-semibold motion-safe:transition-[transform,box-shadow,background-color] motion-safe:duration-150 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md";
 
+const ACTIONS: {
+  kind: SignupKind;
+  label: string;
+  Icon: LucideIcon;
+  className: string;
+}[] = [
+  {
+    kind: "dog",
+    label: "I have a dog",
+    Icon: Dog,
+    className: "border-transparent bg-amber-600 text-white shadow-sm hover:bg-amber-700",
+  },
+  {
+    kind: "volunteer",
+    label: "I want to volunteer",
+    Icon: HandHeart,
+    className: "border-amber-600 bg-transparent text-amber-800 hover:bg-amber-100",
+  },
+  {
+    kind: "pledge",
+    label: "I want to support",
+    Icon: HeartHandshake,
+    className: "border-amber-600 bg-transparent text-amber-800 hover:bg-amber-100",
+  },
+];
+
 export default function Hero({ onOpen }: HeroProps) {
+  const [hasArt, setHasArt] = useState(true);
+
   return (
     <section id="top" className="relative isolate">
       <div
@@ -48,35 +74,41 @@ export default function Hero({ onOpen }: HeroProps) {
           Foothills Community Park, Shelter A — bring your dog, meet the squad.
         </p>
 
-        <div className="mt-4 sm:mt-8">
-          <LineupPlaceholder />
-        </div>
+        <figure className="mt-4 sm:mt-8">
+          <div className="relative aspect-[16/7] w-full overflow-hidden rounded-3xl shadow-[0_12px_40px_-12px_rgba(120,53,15,0.28)] ring-1 ring-amber-200/80">
+            {hasArt ? (
+              <img
+                src="/lineup.png"
+                alt="The Mochi's Legacy kickoff squad portrait."
+                className="h-full w-full object-cover"
+                onError={() => setHasArt(false)}
+              />
+            ) : (
+              <div className="group flex h-full w-full items-center justify-center border-2 border-dashed border-amber-300 bg-amber-50/70">
+                <PawPrint
+                  aria-hidden
+                  className="h-8 w-8 text-amber-400 motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:rotate-12"
+                />
+              </div>
+            )}
+          </div>
+          <figcaption className="mt-2 text-sm text-stone-500">
+            The kickoff squad — come meet them October 2.
+          </figcaption>
+        </figure>
 
         <div className="mx-auto mt-4 flex max-w-md flex-col gap-2.5 sm:mt-8 sm:gap-3">
-          <button
-            type="button"
-            onClick={() => onOpen("dog")}
-            className={`${btn} border-transparent bg-amber-600 text-white shadow-sm hover:bg-amber-700`}
-          >
-            <Dog className="h-5 w-5" aria-hidden />
-            I have a dog
-          </button>
-          <button
-            type="button"
-            onClick={() => onOpen("volunteer")}
-            className={`${btn} border-amber-600 bg-transparent text-amber-800 hover:bg-amber-100`}
-          >
-            <HandHeart className="h-5 w-5" aria-hidden />
-            I want to volunteer
-          </button>
-          <button
-            type="button"
-            onClick={() => onOpen("pledge")}
-            className={`${btn} border-amber-600 bg-transparent text-amber-800 hover:bg-amber-100`}
-          >
-            <HeartHandshake className="h-5 w-5" aria-hidden />
-            I want to support
-          </button>
+          {ACTIONS.map(({ kind, label, Icon, className }) => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => onOpen(kind)}
+              className={`${btn} ${className}`}
+            >
+              <Icon className="h-5 w-5" aria-hidden />
+              {label}
+            </button>
+          ))}
         </div>
       </div>
     </section>

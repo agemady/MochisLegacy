@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  Social card source. Playwright renders this to public/og.png at 1200×630.
+
+  Generate:
+    npx playwright test e2e/og.spec.ts
+
+  p3: add this npm script (package.json is yours), then set og:image to /og.png:
+    "og": "playwright test e2e/og.spec.ts"
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mochi's Legacy — og card</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1200px; height: 630px; overflow: hidden; }
+      body {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 72px;
+        color: #44403c;
+        font-family: Georgia, "Times New Roman", serif;
+        background: linear-gradient(180deg, rgba(251, 191, 36, 0.28), #fffbeb 48%, #fff7ed);
+      }
+      .paw {
+        position: absolute;
+        right: 64px;
+        bottom: 40px;
+        width: 280px;
+        height: 280px;
+        opacity: 0.08;
+      }
+      .copy { position: relative; max-width: 920px; text-align: center; }
+      h1 {
+        font-size: 88px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+        color: #292524;
+      }
+      .mission {
+        margin-top: 28px;
+        font-size: 28px;
+        line-height: 1.35;
+        color: #57534e;
+      }
+      .kickoff {
+        margin-top: 32px;
+        font-size: 24px;
+        color: #44403c;
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="paw" viewBox="0 0 32 32" aria-hidden="true">
+      <ellipse cx="16" cy="22" rx="6.2" ry="5.2" fill="#d97706"/>
+      <circle cx="8" cy="13.5" r="2.8" fill="#d97706"/>
+      <circle cx="12.5" cy="8.8" r="2.9" fill="#d97706"/>
+      <circle cx="19.5" cy="8.8" r="2.9" fill="#d97706"/>
+      <circle cx="24" cy="13.5" r="2.8" fill="#d97706"/>
+    </svg>
+    <div class="copy">
+      <h1>Mochi's Legacy</h1>
+      <p class="mission">
+        A Boulder-area crew of volunteer dogs and handlers sharing comfort
+        and joy, one visit at a time.
+      </p>
+      <p class="kickoff">October 2 · Foothills Community Park, Shelter A</p>
+    </div>
+  </body>
+</html>

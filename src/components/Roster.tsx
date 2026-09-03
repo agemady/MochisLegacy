@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { roster, type RosterDog, type RosterTier } from "../data/roster";
 import { listRosterDogs } from "../lib/schedule";
-import Header from "./Header";
 import Footer from "./Footer";
 
 const tierLabel: Record<RosterTier, string> = {
@@ -42,7 +41,6 @@ export default function Roster() {
 
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800">
-      <Header />
       <main className="mx-auto max-w-5xl px-4 py-16">
         <a
           href="/"

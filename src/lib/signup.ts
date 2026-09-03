@@ -1,4 +1,4 @@
-import { isSupabaseConfigured, supabase } from './supabase'
+import { getSupabase } from './supabase'
 
 export type SubmitResult = {
   ok: boolean
@@ -40,63 +40,57 @@ export type SubscribeInput = {
   email: string
 }
 
-type OutboxKind = 'dog' | 'volunteer' | 'pledge' | 'subscribe'
-type OutboxEntry =
-  | { kind: 'dog'; payload: DogSignupInput }
-  | { kind: 'volunteer'; payload: VolunteerInput }
-  | { kind: 'pledge'; payload: PledgeInput }
-  | { kind: 'subscribe'; payload: SubscribeInput }
-
-const OUTBOX_KEY = 'mochislegacy-form-outbox'
-const DEMO_MESSAGE =
-  'Saved locally (demo mode). Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to submit for real.'
-
-function readOutbox(): OutboxEntry[] {
-  try {
-    return JSON.parse(localStorage.getItem(OUTBOX_KEY) ?? '[]') as OutboxEntry[]
-  } catch {
-    return []
-  }
+const DEMO: SubmitResult = {
+  ok: true,
+  demo: true,
+  message:
+    'Demo mode. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to submit for real.',
 }
 
-function writeOutbox(entries: OutboxEntry[]): void {
-  localStorage.setItem(OUTBOX_KEY, JSON.stringify(entries))
+const OFFLINE: SubmitResult = {
+  ok: false,
+  demo: false,
+  message: 'Sign-ups are temporarily offline. Please try again soon.',
 }
 
-function fail(error: { message?: string } | null): SubmitResult {
-  return {
-    ok: false,
-    demo: false,
-    message: error?.message || 'Something went wrong — please try again.',
-  }
-}
+const FRIENDLY_ERRORS = new Set([
+  'email is required',
+  'invalid email address',
+  'owner name is required',
+  'dog name is required',
+  'name is required',
+  'a field is too long',
+  'frequency must be one-time, monthly, or yearly',
+  'pledge amount cannot be negative',
+])
 
-function ok(id: unknown, message: string): SubmitResult {
-  return {
-    ok: true,
-    demo: false,
-    id: typeof id === 'string' ? id : undefined,
-    message,
-  }
-}
+const FALLBACK_ERROR = 'Unable to submit right now. Please try again or email us.'
 
-function demoSave(kind: OutboxKind, payload: OutboxEntry['payload']): SubmitResult {
-  writeOutbox([...readOutbox(), { kind, payload } as OutboxEntry])
-  console.info(`[Mochi's Legacy] demo ${kind} stored locally`, payload)
-  return { ok: true, demo: true, message: DEMO_MESSAGE }
+function sanitizeError(raw: string | undefined): string {
+  const message = (raw ?? '').trim()
+  return FRIENDLY_ERRORS.has(message) ? message : FALLBACK_ERROR
 }
 
 async function rpc(name: string, args: Record<string, unknown>): Promise<SubmitResult> {
-  if (!supabase) {
-    return { ok: false, demo: true, message: 'Supabase is not configured.' }
-  }
+  const supabase = await getSupabase()
+  if (!supabase) return import.meta.env.PROD ? OFFLINE : DEMO
   const { data, error } = await supabase.rpc(name, args)
-  if (error) return fail(error)
-  return ok(data, 'Thanks — we got it.')
+  if (error) {
+    return {
+      ok: false,
+      demo: false,
+      message: sanitizeError(error.message),
+    }
+  }
+  return {
+    ok: true,
+    demo: false,
+    id: typeof data === 'string' ? data : undefined,
+    message: 'Thanks — we got it.',
+  }
 }
 
-export async function submitDogSignup(input: DogSignupInput): Promise<SubmitResult> {
-  if (!isSupabaseConfigured) return demoSave('dog', input)
+export function submitDogSignup(input: DogSignupInput): Promise<SubmitResult> {
   return rpc('public_submit_dog_signup', {
     p_owner_name: input.ownerName,
     p_email: input.email,
@@ -109,8 +103,7 @@ export async function submitDogSignup(input: DogSignupInput): Promise<SubmitResu
   })
 }
 
-export async function submitVolunteer(input: VolunteerInput): Promise<SubmitResult> {
-  if (!isSupabaseConfigured) return demoSave('volunteer', input)
+export function submitVolunteer(input: VolunteerInput): Promise<SubmitResult> {
   return rpc('public_submit_volunteer', {
     p_name: input.name,
     p_email: input.email,
@@ -121,8 +114,7 @@ export async function submitVolunteer(input: VolunteerInput): Promise<SubmitResu
   })
 }
 
-export async function submitPledge(input: PledgeInput): Promise<SubmitResult> {
-  if (!isSupabaseConfigured) return demoSave('pledge', input)
+export function submitPledge(input: PledgeInput): Promise<SubmitResult> {
   return rpc('public_submit_pledge', {
     p_name: input.name,
     p_email: input.email,
@@ -133,34 +125,6 @@ export async function submitPledge(input: PledgeInput): Promise<SubmitResult> {
   })
 }
 
-export async function subscribe(input: SubscribeInput): Promise<SubmitResult> {
-  if (!isSupabaseConfigured) return demoSave('subscribe', input)
-  return rpc('public_subscribe', {
-    p_email: input.email,
-  })
-}
-
-async function flushEntry(entry: OutboxEntry): Promise<boolean> {
-  const result =
-    entry.kind === 'dog'
-      ? await submitDogSignup(entry.payload)
-      : entry.kind === 'volunteer'
-        ? await submitVolunteer(entry.payload)
-        : entry.kind === 'pledge'
-          ? await submitPledge(entry.payload)
-          : await subscribe(entry.payload)
-  return result.ok && !result.demo
-}
-
-export async function flushFormOutbox(): Promise<void> {
-  if (!isSupabaseConfigured) return
-  const remaining: OutboxEntry[] = []
-  for (const entry of readOutbox()) {
-    if (!(await flushEntry(entry))) remaining.push(entry)
-  }
-  writeOutbox(remaining)
-}
-
-if (isSupabaseConfigured) {
-  void flushFormOutbox()
+export function subscribe(input: SubscribeInput): Promise<SubmitResult> {
+  return rpc('public_subscribe', { p_email: input.email })
 }

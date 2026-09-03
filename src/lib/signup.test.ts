@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SubmitResult } from './signup'
 
 type Spec = {
@@ -19,23 +19,11 @@ const specs: Spec[] = [
   { fn: 'subscribe', input: { email: 's@x.co' }, name: 'public_subscribe', keys: ['p_email'] },
 ]
 
-// Minimal localStorage stub — signup may persist unsubmitted forms locally (node env lacks it).
-const mem = new Map<string, string>()
-vi.stubGlobal('localStorage', {
-  getItem: (k: string) => mem.get(k) ?? null,
-  setItem: (k: string, v: string) => void mem.set(k, v),
-})
-
-function clearOutbox(): void {
-  mem.clear()
-}
-
-afterEach(clearOutbox)
-
 describe('signup in demo mode (env unset)', () => {
   it('every submit function returns { ok: true, demo: true } without calling rpc', async () => {
     vi.stubEnv('VITE_SUPABASE_URL', undefined)
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', undefined)
+    vi.stubEnv('PROD', false)
     vi.resetModules()
     const s = await import('./signup')
     const results = await Promise.all([
@@ -48,13 +36,35 @@ describe('signup in demo mode (env unset)', () => {
   })
 })
 
+describe('signup in production with supabase unconfigured', () => {
+  it('returns ok:false with the offline message, not a fake success', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', undefined)
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', undefined)
+    vi.stubEnv('PROD', true)
+    vi.resetModules()
+    const s = await import('./signup')
+    const results = await Promise.all([
+      s.submitDogSignup({ ownerName: 'O', email: 'o@x.co', dogName: 'Rex' }),
+      s.submitVolunteer({ name: 'V', email: 'v@x.co' }),
+      s.submitPledge({ name: 'P', email: 'p@x.co' }),
+      s.subscribe({ email: 's@x.co' }),
+    ])
+    for (const r of results) {
+      expect(r).toEqual({
+        ok: false,
+        demo: false,
+        message: 'Sign-ups are temporarily offline. Please try again soon.',
+      })
+    }
+  })
+})
+
 describe('signup with env set (supabase mocked)', () => {
   const rpc = vi.fn()
   beforeEach(() => {
-    clearOutbox()
     vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co')
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'anon-key')
-    vi.doMock('./supabase', () => ({ isSupabaseConfigured: true, supabase: { rpc } }))
+    vi.doMock('./supabase', () => ({ getSupabase: () => Promise.resolve({ rpc }) }))
     vi.resetModules()
     rpc.mockReset().mockResolvedValue({ data: 'new-uuid', error: null })
   })
@@ -68,10 +78,21 @@ describe('signup with env set (supabase mocked)', () => {
     expect(Object.keys(rpc.mock.calls[0][1] as object).sort()).toEqual([...keys].sort())
   })
 
-  it('returns ok:false with a message when rpc errors', async () => {
+  it('passes through friendly RPC validation messages', async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: 'invalid email address' } })
+    const s = (await import('./signup')) as typeof import('./signup')
+    const res = await s.subscribe({ email: 'nope' })
+    expect(res).toMatchObject({ ok: false, demo: false, message: 'invalid email address' })
+  })
+
+  it('sanitizes unexpected rpc errors to a generic fallback', async () => {
     rpc.mockResolvedValueOnce({ data: null, error: { message: 'row-level security blocked insert' } })
     const s = (await import('./signup')) as typeof import('./signup')
     const res = await s.subscribe({ email: 's@x.co' })
-    expect(res).toMatchObject({ ok: false, demo: false, message: 'row-level security blocked insert' })
+    expect(res).toMatchObject({
+      ok: false,
+      demo: false,
+      message: 'Unable to submit right now. Please try again or email us.',
+    })
   })
 })
