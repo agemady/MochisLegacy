@@ -3,6 +3,13 @@
 @theme {
   --animate-fade-up: fade-up 0.65s ease-out both;
   --font-display: "Fraunces", Georgia, serif;
+  --color-ground: #fdfbf7;
+  --color-espresso: #29180c;
+  --color-umber: #6b5545;
+  --color-honey: #d97706;
+  --color-honey-dark: #b45309;
+  --color-pine: #2c5e43;
+  --color-sandstone: #f3d9a2;
 }
 
 @keyframes fade-up {
@@ -16,22 +23,35 @@
   }
 }
 
+@keyframes tail-wag {
+  50% {
+    transform: rotate(14deg);
+  }
+}
+
 @layer base {
   html {
     min-height: 100%;
-    background-color: #faf3e3;
+    background-color: #fdfbf7;
     background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='%237a4e12' fill-opacity='0.055'%3E%3Cellipse cx='32' cy='40' rx='8' ry='6'/%3E%3Ccircle cx='21' cy='27' r='3.6'/%3E%3Ccircle cx='30' cy='20' r='3.8'/%3E%3Ccircle cx='41' cy='20' r='3.8'/%3E%3Ccircle cx='49' cy='28' r='3.6'/%3E%3Cellipse cx='102' cy='104' rx='8' ry='6' transform='rotate(-22 102 104)'/%3E%3Ccircle cx='91' cy='92' r='3.6'/%3E%3Ccircle cx='100' cy='85' r='3.8'/%3E%3Ccircle cx='111' cy='87' r='3.8'/%3E%3Ccircle cx='118' cy='96' r='3.6'/%3E%3C/g%3E%3C/svg%3E"),
-      linear-gradient(180deg, #f3d39a 0%, #faf3e3 40%, #f0e2c4 100%);
-    background-size: 140px 140px, auto;
+      radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.28) 0%, rgba(253, 251, 247, 0) 65%),
+      radial-gradient(#d97706 0.75px, transparent 0.75px);
+    background-size: 100% 100%, 28px 28px;
   }
 
   body {
-    @apply text-amber-950 antialiased selection:bg-amber-700/25;
+    color: #29180c;
     background: transparent;
   }
 
   #root > .min-h-screen {
     background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .squad:hover .squad-tail {
+    animation: tail-wag 0.45s ease-in-out infinite;
+    transform-origin: 8px 18px;
   }
 }

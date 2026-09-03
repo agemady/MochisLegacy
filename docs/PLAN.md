@@ -10,7 +10,29 @@ Living plan, partitioned into small slices. One slice = one owner = disjoint pat
 
 **Lanes.** `landing` = main branch, `D:/projects/MochisLegacy`. `sched` = branch `scheduling`, worktree `D:/projects/MochisLegacy-scheduling`. Reviewers do not claim slices.
 
-## In progress (rulings 11 + 12 round)
+## In progress (rulings 13–15 round, 08:55Z)
+
+| Id | Lane | Pane | Slice |
+|---|---|---|---|
+| L-dirA-chrome | landing | p9 | Direction A hero, invitation card, chips, buttons, footer, page wash (2a545d9 landed; iterating from the judge's review) |
+| L-dirA-modal | landing | p4 | Direction A dialog styling |
+| L-og-dirA | landing | p5 | Social card restyled to Direction A, regenerate `public/og.png` |
+| L-e2e | landing | pF | landing.spec.ts + screenshots spec (still not committed; on watch) |
+| S-data-14 | sched | pH | Done be54ef6; standing by |
+| S-schema-14 | sched | pG | Done f09f53f; standing by |
+| S-shell | sched | p1 | Done 6abf622; now owns `PageTop.tsx` (edit pA's stub in place), signed-out `/schedule` |
+| S-rsvp-ui-15 | sched | pD | Done 6356bd8; iterating from brainstorm-sched |
+| S-checkin-ui-15 | sched | pE | `/checkin` to the brief |
+| S-signin-copy | sched | p6 | `SignIn.tsx` to the auth-card brief |
+| S-roster-restyle | sched | pA | Done bf74613 |
+| S-e2e | sched | pB | `e2e/schedule.spec.ts` |
+| R-judge-landing | review | pM (Fable) | scored screenshot review of Direction A → `.scratch/review-visual-landing-1.md` |
+| R-brainstorm-landing | review | pN (Fable) | signature moments + final copy → `.scratch/brainstorm-landing-1.md` |
+| R-brainstorm-sched | review | pP (Fable) | owner/founder journeys + refinements → `.scratch/brainstorm-schedule-1.md` |
+
+Idle and available: p3, p7 (landing), pG, pH, pA (scheduling). Next slices come from the judge and brainstorm docs.
+
+## Older in-progress table (superseded)
 
 | Id | Lane | Pane | Slice |
 |---|---|---|---|
