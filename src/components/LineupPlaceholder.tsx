@@ -25,7 +25,7 @@ export default function LineupPlaceholder() {
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 border-2 border-dashed border-amber-300 bg-amber-50/60 px-6 text-center">
           <PawPrint className="h-8 w-8 text-amber-400" aria-hidden />
           <p className="max-w-prose text-sm font-medium text-stone-500">
-            The squad lineup portrait is coming soon.
+            The full squad portrait goes here.
           </p>
         </div>
       )}
