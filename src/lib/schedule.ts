@@ -1,5 +1,5 @@
 import { roster } from '../data/roster'
-import { isSupabaseConfigured, supabase } from './supabase'
+import { getSupabase } from './supabase'
 import { placeRsvp, type Rsvp } from './rsvp'
 
 export type Person = {
@@ -22,7 +22,6 @@ export type Result<T = unknown> = { ok: boolean; data?: T; message: string }
 
 const OWNER = 'person-demo'
 const AT = '2026-09-03T00:00:00.000Z'
-const demo = !isSupabaseConfigured || !supabase
 const ok = <T>(data: T, message: string): Result<T> => ({ ok: true, data, message })
 const fail = (message: string): Result<never> => ({ ok: false, message })
 const iso = () => new Date().toISOString()
@@ -51,26 +50,31 @@ function rowOf(list: WalkRsvp[], walkId: string, dogId: string) {
 }
 
 async function loadWalk(id: string): Promise<Result<Walk>> {
-  if (demo) return id === walk.id ? ok(walk, 'Demo mode') : fail('Walk not found.')
-  const { data, error } = await supabase!.from('walks').select('*').eq('id', id).maybeSingle()
+  const supabase = await getSupabase()
+  if (!supabase) return id === walk.id ? ok(walk, 'Demo mode') : fail('Walk not found.')
+  const { data, error } = await supabase.from('walks').select('*').eq('id', id).maybeSingle()
   return error || !data ? fail('Walk not found.') : ok(data as Walk, 'OK')
 }
 
 async function loadRsvps(walkId: string): Promise<Result<WalkRsvp[]>> {
-  if (demo) return ok(rsvps.filter((r) => r.walk_id === walkId), 'Demo mode')
-  const { data, error } = await supabase!.from('walk_rsvps').select('*').eq('walk_id', walkId)
+  const supabase = await getSupabase()
+  if (!supabase) return ok(rsvps.filter((r) => r.walk_id === walkId), 'Demo mode')
+  const { data, error } = await supabase.from('walk_rsvps').select('*').eq('walk_id', walkId)
   return error ? fail('Unable to load RSVPs right now.') : ok((data ?? []) as WalkRsvp[], 'OK')
 }
 
 async function requireAdmin(): Promise<Result<true>> {
-  const { data } = await supabase!.rpc('is_admin')
+  const supabase = await getSupabase()
+  if (!supabase) return fail('Admin only.')
+  const { data } = await supabase.rpc('is_admin')
   return data === true ? ok(true, 'OK') : fail('Admin only.')
 }
 
 async function patchRsvp(
   walkId: string, dogId: string, patch: Partial<WalkRsvp>, missing: string, done: string, admin: boolean,
 ): Promise<Result<WalkRsvp>> {
-  if (demo) {
+  const supabase = await getSupabase()
+  if (!supabase) {
     const row = rowOf(rsvps, walkId, dogId)
     if (!row || row.opted_out_at) return fail(missing)
     Object.assign(row, patch)
@@ -80,15 +84,16 @@ async function patchRsvp(
     const gate = await requireAdmin()
     if (!gate.ok) return fail(gate.message)
   }
-  const { data, error } = await supabase!
+  const { data, error } = await supabase
     .from('walk_rsvps').update(patch).eq('walk_id', walkId).eq('dog_id', dogId)
     .is('opted_out_at', null).select().maybeSingle()
   return error || !data ? fail(missing) : ok(data as WalkRsvp, done)
 }
 
 export async function getUpcomingWalk(): Promise<Result<Walk | null>> {
-  if (demo) return ok(walk, 'Demo mode')
-  const { data, error } = await supabase!
+  const supabase = await getSupabase()
+  if (!supabase) return ok(walk, 'Demo mode')
+  const { data, error } = await supabase
     .from('walks').select('*').eq('status', 'published').gte('starts_at', iso())
     .order('starts_at').limit(1).maybeSingle()
   if (error) return fail('Unable to load walks right now.')
@@ -96,10 +101,11 @@ export async function getUpcomingWalk(): Promise<Result<Walk | null>> {
 }
 
 export async function getMyDogs(): Promise<Result<Dog[]>> {
-  if (demo) return ok(dogs, 'Demo mode')
-  const { data: pid, error: pidErr } = await supabase!.rpc('current_person_id')
+  const supabase = await getSupabase()
+  if (!supabase) return ok(dogs, 'Demo mode')
+  const { data: pid, error: pidErr } = await supabase.rpc('current_person_id')
   if (pidErr || !pid) return fail('Sign in to see your dogs.')
-  const { data, error } = await supabase!.from('dogs').select('*').eq('owner_id', pid)
+  const { data, error } = await supabase.from('dogs').select('*').eq('owner_id', pid)
   return error ? fail('Unable to load dogs right now.') : ok((data ?? []) as Dog[], 'OK')
 }
 
@@ -109,7 +115,7 @@ export async function getMyRsvps(walkId: string): Promise<Result<WalkRsvp[]>> {
   const ids = new Set(mine.data.map((d) => d.id))
   const all = await loadRsvps(walkId)
   if (!all.ok || !all.data) return fail(all.message)
-  return ok(all.data.filter((r) => ids.has(r.dog_id)), demo ? 'Demo mode' : 'OK')
+  return ok(all.data.filter((r) => ids.has(r.dog_id)), mine.message)
 }
 
 export async function rsvp(
@@ -128,12 +134,13 @@ export async function rsvp(
     walk_id: walkId, dog_id: dogId, waiver_signed: consents.waiverSigned, photo_consent: consents.photoConsent,
     checked_in_at: null, opted_out_at: null, created_at: iso(),
   }
-  if (demo) {
+  const supabase = await getSupabase()
+  if (!supabase) {
     if (existing) Object.assign(existing, next)
     else rsvps = [...rsvps, next]
     return ok(existing ?? next, message)
   }
-  const { data, error } = await supabase!.from('walk_rsvps').upsert(next, { onConflict: 'walk_id,dog_id' }).select().single()
+  const { data, error } = await supabase.from('walk_rsvps').upsert(next, { onConflict: 'walk_id,dog_id' }).select().single()
   return error ? fail('Unable to RSVP right now.') : ok(data as WalkRsvp, message)
 }
 
@@ -142,7 +149,7 @@ export async function optOut(walkId: string, dogId: string): Promise<Result<Walk
 }
 
 export async function listRsvpsForWalk(walkId: string): Promise<Result<WalkRsvp[]>> {
-  if (demo) return ok(rsvps.filter((r) => r.walk_id === walkId), 'Demo mode')
+  if (!(await getSupabase())) return ok(rsvps.filter((r) => r.walk_id === walkId), 'Demo mode')
   const gate = await requireAdmin()
   return gate.ok ? loadRsvps(walkId) : fail(gate.message)
 }
@@ -156,9 +163,9 @@ export type RosterCard = { id: string; name: string; tier: Dog['tier'] }
 /** Active dogs for /roster. Unconfigured or empty live table uses roster.ts. */
 export async function listRosterDogs(): Promise<Result<RosterCard[]>> {
   const fixture: RosterCard[] = roster.map((d) => ({ id: d.id, name: d.name, tier: d.tier }))
-  if (demo) return ok(fixture, 'Demo mode')
-  const { data, error } = await supabase!
-    .from('dogs').select('id, name, tier').eq('status', 'active').order('name')
+  const supabase = await getSupabase()
+  if (!supabase) return ok(fixture, 'Demo mode')
+  const { data, error } = await supabase.from('dogs').select('id, name, tier').eq('status', 'active').order('name')
   if (error) return fail('Unable to load the roster right now.')
   const rows = (data ?? []) as RosterCard[]
   return ok(rows.length ? rows : fixture, rows.length ? 'OK' : 'Demo fixture')

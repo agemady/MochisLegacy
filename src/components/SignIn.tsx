@@ -1,16 +1,21 @@
-import { useState, type FormEvent } from "react";
-import { isSupabaseConfigured } from "../lib/supabase";
+import { useEffect, useState, type FormEvent } from "react";
+import { getSupabase } from "../lib/supabase";
 import { signInWithOtp } from "../lib/auth";
 
 export default function SignIn() {
+  const [configured, setConfigured] = useState(false);
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    void getSupabase().then((client) => setConfigured(client !== null));
+  }, []);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!isSupabaseConfigured || pending) return;
+    if (!configured || pending) return;
     setPending(true);
     setSuccess(null);
     setError(null);
@@ -30,7 +35,7 @@ export default function SignIn() {
       <p className="mt-2 text-sm leading-relaxed text-stone-600">
         Enter your email and we&rsquo;ll send a one-time sign-in link.
       </p>
-      {!isSupabaseConfigured && (
+      {!configured && (
         <p
           role="status"
           className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
@@ -53,7 +58,7 @@ export default function SignIn() {
         </label>
         <button
           type="submit"
-          disabled={pending || !isSupabaseConfigured}
+          disabled={pending || !configured}
           className="inline-flex items-center justify-center rounded-full bg-amber-600 px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? "Sending…" : "Send me a sign-in link"}
