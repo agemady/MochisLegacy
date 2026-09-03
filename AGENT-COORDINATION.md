@@ -16,13 +16,19 @@
 
 | Pane | Model | Owns |
 |---|---|---|
-| `w2:p1` | GLM 5.3 flash | `src/App.tsx` composition (holds `useState<SignupKind \| null>`), `src/components/Header.tsx` (logo + name only), `Hero.tsx` (title, mission sentence, kickoff line, three buttons via `onOpen: (kind: SignupKind) => void`), `LineupPlaceholder.tsx`, `Footer.tsx`, `src/index.css` |
-| `w2:p3` | GLM 5.3 flash | `README.md`, `.env.example`, `index.html` meta/OG; then **build sentinel**: after each new commit run `npm run build` + `npm run lint`, write status to `.scratch/build-status.md` |
+| `w2:p1` | GLM 5.3 flash | **Roster** (unlisted page): `src/data/roster.ts`, `src/components/Roster.tsx`, the `/roster` pathname switch in `src/App.tsx`, `public/_redirects` |
+| `w2:p3` | GLM 5.3 flash | `README.md`, `.env.example`, `index.html`, `.github/workflows/ci.yml`; **build sentinel**: after each new commit run `npm run build` + `npm run lint`, write status to `.scratch/build-status.md` |
 | `w2:p4` | GLM 5.3 flash | `src/components/forms/SignupModal.tsx` (exports `type SignupKind = 'dog' \| 'volunteer' \| 'pledge'`; default export `SignupModal({ kind, onClose }: { kind: SignupKind \| null; onClose: () => void })`; renders nothing when `kind` is null; one form per kind reusing the existing dog/volunteer/pledge bodies and `src/lib/signup.ts`), `Newsletter.tsx` (single email field). Commits `SignupModal.tsx` first; after p1's App no longer imports them, deletes `Mission.tsx`, `DogSquad.tsx`, `src/data/dogs.ts`, `forms/SignupTabs.tsx` |
-| `w2:p5` | Grok 4.6 | Map driver (tracker hygiene only, no source files); `docs/DEPLOY.md`; then idle |
-| `w2:p6` | Grok 4.6 | Integration reviewer: correctness + founder-safety of landed commits, findings to `.scratch/p6-review.md`; no source files, no ticket ops, no steering other panes |
-| `w2:p7` | Grok 4.6 | `supabase/schema.sql` (Stage 1 schema per ruling 5), `src/lib/supabase.ts`, `src/lib/signup.ts` (typed `submitDogSignup` / `submitVolunteer` / `submitPledge` / `subscribe`, demo-mode fallback when `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are missing). Publish the `signup.ts` interface first |
+| `w2:p5` | Gemini 3.8 flash | **Reviewer cut-review**: no source edits; output `.scratch/review-cut.md` (what to delete, file:line, lines saved) |
+| `w2:p6` | Muse Spark 1.3 | **Reviewer design-copy**: no source edits; output `.scratch/review-design.md` (critique + copy options) |
+| `w2:p7` | Grok 4.6 fast | **lib-trim**: `src/lib/signup.ts`, `src/lib/supabase.ts`, `supabase/schema.sql`. Exported names/types stay stable (SignupModal imports them) |
+| `w2:p9` | Grok 4.6 fast | **chrome**: `src/components/Header.tsx`, `Hero.tsx`, `LineupPlaceholder.tsx`, `Footer.tsx`, `src/index.css`; mobile pass on those files |
+| `w2:pA` | Gemini 3.8 flash | **Reviewer tech-debt**: no source edits; output `.scratch/review-arch.md` (what hurts in three months, smallest fix, now vs defer) |
 | `w2:p8` | Fable | Overseer. Pushes to `origin/main`. Steers panes. Posts rulings on the map |
+
+## Scheduling track (branch `scheduling`, worktree `D:/projects/MochisLegacy-scheduling`)
+
+Not urgent, but key once walks and events start. Lives on its own branch in its own worktree so landing work on `main` is never disturbed. Phase 1 is design only: `docs/scheduling/DESIGN.md` (domain model, MVP scope for Gaggle of Goldens walks, data additions, mobile-first UI sketch, auth question, what not to build). No source code on that branch until the overseer approves the design. Agents on that track work only inside the worktree directory.
 
 ## Hard rules
 
@@ -31,3 +37,5 @@
 - Do not touch `package.json` / lockfile (build is done).
 - Claim a ticket by assigning it before touching files; refer to tickets by name.
 - Only the overseer steers other panes. Objections go to the overseer, not to other agents.
+- Reviewers never edit source. Their findings go to `.scratch/review-*.md`; the overseer adjudicates and hands trims to the file owner. Less code wins: a finding that deletes lines outranks one that adds them.
+- Sessions are disposable: spawned per task, exited when done. Builders are Grok 4.6 fast (high) or GLM 5.3 flash; reviewers are Gemini 3.8 flash or Muse Spark 1.3; large judgment calls are the overseer's.
