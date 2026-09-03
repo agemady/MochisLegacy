@@ -1,15 +1,17 @@
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import Mission from "./components/Mission";
+import DogSquad from "./components/DogSquad";
 import Footer from "./components/Footer";
 
 /**
  * App composition (pane w2:p1).
  *
- * Header / Hero / Footer are chrome, owned here. The Mission, DogSquad, and
- * SignupForms sections are owned by pane w2:p4 and land in src/components/.
- * Until they exist, temporary anchor placeholders keep the ids (#mission,
- * #squad, #signup) resolvable and the build green. When p4's components
- * land, replace each <SectionPlaceholder> with its real component.
+ * Header / Hero / Footer are chrome, owned here. Mission and DogSquad are
+ * owned by pane w2:p4 and are wired in below (their section ids #mission and
+ * #squad are baked into the components). The signup forms (#signup) are still
+ * pending from p4; a temporary placeholder keeps the id resolvable and the
+ * build green until they land.
  */
 export default function App() {
   return (
@@ -18,8 +20,8 @@ export default function App() {
       <main>
         <Hero />
 
-        <SectionPlaceholder id="mission" title="Our Mission" />
-        <SectionPlaceholder id="squad" title="Dog Squad" />
+        <Mission />
+        <DogSquad />
         <SectionPlaceholder id="signup" title="Sign Up" />
       </main>
       <Footer />
