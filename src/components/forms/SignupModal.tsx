@@ -9,7 +9,7 @@ import {
   Dog,
   HandHeart,
   HeartHandshake,
-  Info,
+  PawPrint,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -17,6 +17,7 @@ import {
   submitDogSignup,
   submitPledge,
   submitVolunteer,
+  type PledgeInput,
   type SubmitResult,
 } from "../../lib/signup";
 
@@ -30,6 +31,11 @@ import {
  * to only the fields needed at signup. Each form submits through p7's
  * src/lib/signup.ts RPC wrappers and renders SubmitResult.message verbatim;
  * the pledge form keeps its not-yet-501(c)(3) notice.
+ *
+ * On a successful submit the form body is replaced by a warm thank-you
+ * card, so the form cannot be resubmitted (a double-tap on mobile cannot
+ * create a duplicate row); demo results say plainly that nothing was
+ * saved. Server error messages are rendered verbatim.
  *
  * Accessibility: renders nothing when `kind` is null; otherwise a
  * role="dialog" overlay that closes on Escape, on backdrop mousedown, or
@@ -52,13 +58,12 @@ const KIND_META: Record<
   volunteer: {
     label: "Lend a hand",
     blurb:
-      "Tell us who you are and how you’d like to help — no dog and no experience needed.",
+      "Tell us who you are and how you’d like to help — no dog and no experience needed; we’ll find you a job that fits.",
     icon: HandHeart,
   },
   pledge: {
     label: "Back the mission",
-    blurb:
-      "Pledges help us plan the launch with confidence — we’re not yet a 501(c)(3), so pledges are not tax-deductible.",
+    blurb: "Pledges help us plan the launch with confidence.",
     icon: HeartHandshake,
   },
 };
@@ -71,21 +76,49 @@ const labelCls = "block text-sm font-medium text-stone-700";
 const submitBtnCls =
   "inline-flex items-center justify-center gap-2 rounded-full bg-amber-600 px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60";
 
+// Error-only: successful submissions swap the form body for a SuccessCard.
 function FormStatus({ result }: { result: SubmitResult | null }) {
-  if (!result) return null;
+  if (!result || result.ok) return null;
   return (
     <p
       role="status"
-      className={`rounded-xl border px-4 py-3 text-sm ${
-        !result.ok
-          ? "border-red-300 bg-red-50 text-red-900"
-          : result.demo
-            ? "border-amber-300 bg-amber-50 text-amber-900"
-            : "border-green-300 bg-green-50 text-green-900"
-      }`}
+      className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900"
     >
       {result.message}
     </p>
+  );
+}
+
+function SuccessCard({
+  result,
+  onClose,
+}: {
+  result: SubmitResult;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      role="status"
+      className="flex flex-col items-center gap-3 py-8 text-center"
+    >
+      <PawPrint className="h-10 w-10 text-amber-600" aria-hidden />
+      <p className="text-xl font-semibold text-stone-800">You&rsquo;re in!</p>
+      <p className="max-w-sm text-sm leading-relaxed text-stone-600">
+        {result.message}
+      </p>
+      {result.demo && (
+        <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
+          Demo run — nothing was saved
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={onClose}
+        className="mt-2 rounded-full border border-stone-300 px-6 py-2.5 font-semibold text-stone-700 transition-colors hover:bg-stone-50"
+      >
+        Close
+      </button>
+    </div>
   );
 }
 
@@ -109,7 +142,7 @@ async function runSubmit(
   }
 }
 
-function DogForm() {
+function DogForm({ onClose }: { onClose: () => void }) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SubmitResult | null>(null);
 
@@ -129,29 +162,31 @@ function DogForm() {
     );
   }
 
+  if (result?.ok) return <SuccessCard result={result} onClose={onClose} />;
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
           <span className={labelCls}>Your name *</span>
-          <input name="ownerName" type="text" required autoComplete="name" className={inputCls} />
+          <input name="ownerName" type="text" required autoComplete="name" maxLength={120} className={inputCls} />
         </label>
         <label>
           <span className={labelCls}>Email *</span>
-          <input name="email" type="email" required autoComplete="email" className={inputCls} />
+          <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
         </label>
         <label>
           <span className={labelCls}>Your dog&rsquo;s name *</span>
-          <input name="dogName" type="text" required className={inputCls} />
+          <input name="dogName" type="text" required maxLength={60} className={inputCls} />
         </label>
         <label className="sm:col-span-2">
           <span className={labelCls}>Anything we should know about your dog?</span>
-          <textarea name="notes" rows={3} className={inputCls} />
+          <textarea name="notes" rows={3} maxLength={2000} className={inputCls} />
         </label>
       </div>
       <div className="mt-5 flex flex-col items-start gap-3">
         <button type="submit" disabled={pending} className={submitBtnCls}>
-          {pending ? "Sending…" : "Register your dog"}
+          {pending ? "Sending…" : "Join with my dog"}
         </button>
         <FormStatus result={result} />
       </div>
@@ -159,7 +194,7 @@ function DogForm() {
   );
 }
 
-function VolunteerForm() {
+function VolunteerForm({ onClose }: { onClose: () => void }) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SubmitResult | null>(null);
 
@@ -178,20 +213,22 @@ function VolunteerForm() {
     );
   }
 
+  if (result?.ok) return <SuccessCard result={result} onClose={onClose} />;
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4">
         <label>
           <span className={labelCls}>Your name *</span>
-          <input name="name" type="text" required autoComplete="name" className={inputCls} />
+          <input name="name" type="text" required autoComplete="name" maxLength={120} className={inputCls} />
         </label>
         <label>
           <span className={labelCls}>Email *</span>
-          <input name="email" type="email" required autoComplete="email" className={inputCls} />
+          <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
         </label>
         <label>
           <span className={labelCls}>How would you like to help?</span>
-          <textarea name="interests" rows={3} className={inputCls} />
+          <textarea name="interests" rows={3} maxLength={2000} className={inputCls} />
         </label>
       </div>
 
@@ -205,7 +242,7 @@ function VolunteerForm() {
   );
 }
 
-function PledgeForm() {
+function PledgeForm({ onClose }: { onClose: () => void }) {
   const [amount, setAmount] = useState("");
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SubmitResult | null>(null);
@@ -219,27 +256,25 @@ function PledgeForm() {
           name: String(f.get("name")).trim(),
           email: String(f.get("email")).trim(),
           pledgeAmount: amount.trim() === "" ? undefined : Number(amount),
-          frequency: (String(f.get("frequency")) || undefined) as
-            | "one-time"
-            | "monthly"
-            | "yearly"
-            | undefined,
+          frequency: String(f.get("frequency")) as PledgeInput["frequency"],
         }),
       setPending,
       setResult,
     );
   }
 
+  if (result?.ok) return <SuccessCard result={result} onClose={onClose} />;
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
           <span className={labelCls}>Your name *</span>
-          <input name="name" type="text" required autoComplete="name" className={inputCls} />
+          <input name="name" type="text" required autoComplete="name" maxLength={120} className={inputCls} />
         </label>
         <label>
           <span className={labelCls}>Email *</span>
-          <input name="email" type="email" required autoComplete="email" className={inputCls} />
+          <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
         </label>
         <label>
           <span className={labelCls}>Pledge amount (USD)</span>
@@ -252,12 +287,16 @@ function PledgeForm() {
               type="number"
               min={0}
               step={1}
+              maxLength={8}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value.slice(0, 8))}
               placeholder="25"
               className={`${inputCls} pl-7`}
             />
           </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
+            We&rsquo;re not yet a 501(c)(3), so pledges are not tax-deductible.
+          </p>
         </label>
         <label>
           <span className={labelCls}>Frequency</span>
@@ -270,7 +309,7 @@ function PledgeForm() {
 
       <div className="mt-5 flex flex-col items-start gap-3">
         <button type="submit" disabled={pending} className={submitBtnCls}>
-          {pending ? "Sending…" : "Pledge your support"}
+          {pending ? "Sending…" : "Back the mission"}
         </button>
         <FormStatus result={result} />
       </div>
@@ -375,20 +414,13 @@ export default function SignupModal({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-6 pt-1 sm:p-8 sm:pt-1">
-          {kind === "pledge" ? (
-            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
-              <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-              <p>{meta.blurb}</p>
-            </div>
-          ) : (
-            <p className="mb-5 text-sm leading-relaxed text-stone-600">
-              {meta.blurb}
-            </p>
-          )}
+          <p className="mb-5 text-sm leading-relaxed text-stone-600">
+            {meta.blurb}
+          </p>
 
-          {kind === "dog" && <DogForm />}
-          {kind === "volunteer" && <VolunteerForm />}
-          {kind === "pledge" && <PledgeForm />}
+          {kind === "dog" && <DogForm onClose={onClose} />}
+          {kind === "volunteer" && <VolunteerForm onClose={onClose} />}
+          {kind === "pledge" && <PledgeForm onClose={onClose} />}
         </div>
       </div>
     </div>
