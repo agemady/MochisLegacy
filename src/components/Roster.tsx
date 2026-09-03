@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { roster, type RosterDog, type RosterTier } from "../data/roster";
+import { listRosterDogs } from "../lib/schedule";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -31,6 +32,14 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
 }
 
 export default function Roster() {
+  const [dogs, setDogs] = useState<RosterDog[]>(roster);
+
+  useEffect(() => {
+    void listRosterDogs().then((r) => {
+      if (r.ok && r.data?.length) setDogs(r.data);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800">
       <Header />
@@ -49,7 +58,7 @@ export default function Roster() {
         become a therapy candidate and then a certified therapy dog.
       </p>
         <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {roster.map((dog: RosterDog) => (
+        {dogs.map((dog: RosterDog) => (
             <li
               key={dog.id}
               className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-amber-100"

@@ -1,3 +1,4 @@
+import { roster } from '../data/roster'
 import { isSupabaseConfigured, supabase } from './supabase'
 import { placeRsvp, type Rsvp } from './rsvp'
 
@@ -148,4 +149,17 @@ export async function listRsvpsForWalk(walkId: string): Promise<Result<WalkRsvp[
 
 export async function checkIn(walkId: string, dogId: string): Promise<Result<WalkRsvp>> {
   return patchRsvp(walkId, dogId, { checked_in_at: iso() }, 'Dog is not on this walk.', 'Checked in.', true)
+}
+
+export type RosterCard = { id: string; name: string; tier: Dog['tier'] }
+
+/** Active dogs for /roster. Unconfigured or empty live table uses roster.ts. */
+export async function listRosterDogs(): Promise<Result<RosterCard[]>> {
+  const fixture: RosterCard[] = roster.map((d) => ({ id: d.id, name: d.name, tier: d.tier }))
+  if (demo) return ok(fixture, 'Demo mode')
+  const { data, error } = await supabase!
+    .from('dogs').select('id, name, tier').eq('status', 'active').order('name')
+  if (error) return fail('Unable to load the roster right now.')
+  const rows = (data ?? []) as RosterCard[]
+  return ok(rows.length ? rows : fixture, rows.length ? 'OK' : 'Demo fixture')
 }
