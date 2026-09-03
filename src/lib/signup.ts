@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabase } from './supabase'
 
 export type SubmitResult = {
   ok: boolean
@@ -72,6 +72,7 @@ function sanitizeError(raw: string | undefined): string {
 }
 
 async function rpc(name: string, args: Record<string, unknown>): Promise<SubmitResult> {
+  const supabase = await getSupabase()
   if (!supabase) return import.meta.env.PROD ? OFFLINE : DEMO
   const { data, error } = await supabase.rpc(name, args)
   if (error) {

@@ -64,7 +64,7 @@ describe('signup with env set (supabase mocked)', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co')
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'anon-key')
-    vi.doMock('./supabase', () => ({ supabase: { rpc } }))
+    vi.doMock('./supabase', () => ({ getSupabase: () => Promise.resolve({ rpc }) }))
     vi.resetModules()
     rpc.mockReset().mockResolvedValue({ data: 'new-uuid', error: null })
   })
