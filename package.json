@@ -16,6 +16,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@oxlint/binding-win32-x64-msvc": "^1.81.0",
     "@rolldown/binding-win32-x64-msvc": "^1.2.7",
     "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
