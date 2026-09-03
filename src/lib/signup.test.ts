@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SubmitResult } from './signup'
 
 type Spec = {
@@ -19,6 +19,19 @@ const specs: Spec[] = [
   { fn: 'subscribe', input: { email: 's@x.co' }, name: 'public_subscribe', keys: ['p_email'] },
 ]
 
+// Minimal localStorage stub — signup may persist unsubmitted forms locally (node env lacks it).
+const mem = new Map<string, string>()
+vi.stubGlobal('localStorage', {
+  getItem: (k: string) => mem.get(k) ?? null,
+  setItem: (k: string, v: string) => void mem.set(k, v),
+})
+
+function clearOutbox(): void {
+  mem.clear()
+}
+
+afterEach(clearOutbox)
+
 describe('signup in demo mode (env unset)', () => {
   it('every submit function returns { ok: true, demo: true } without calling rpc', async () => {
     vi.stubEnv('VITE_SUPABASE_URL', undefined)
@@ -38,9 +51,10 @@ describe('signup in demo mode (env unset)', () => {
 describe('signup with env set (supabase mocked)', () => {
   const rpc = vi.fn()
   beforeEach(() => {
+    clearOutbox()
     vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co')
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'anon-key')
-    vi.doMock('./supabase', () => ({ supabase: { rpc } }))
+    vi.doMock('./supabase', () => ({ isSupabaseConfigured: true, supabase: { rpc } }))
     vi.resetModules()
     rpc.mockReset().mockResolvedValue({ data: 'new-uuid', error: null })
   })
