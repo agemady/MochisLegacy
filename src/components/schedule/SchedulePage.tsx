@@ -6,11 +6,7 @@ import {
 import { signInWithOtp, useSession } from '../../lib/auth'
 import { getSupabase } from '../../lib/supabase'
 import { formatWalkWindow } from '../../lib/time'
-
-// TODO(p1): swap this stub for the shared PageTop component once it lands.
-function PageTop() {
-  return <a href="/" className="font-display text-sm font-semibold text-[#D97706] hover:text-[#B45309]">← Home</a>
-}
+import PageTop from '../PageTop'
 
 const CARD = 'rounded-[2rem] border-2 border-[#F3D9A2] bg-white p-6 shadow-[0_16px_40px_-12px_rgba(180,83,9,0.18)]'
 const INPUT = 'w-full rounded-2xl border border-[#E6CCA0] bg-[#FFFDF9] px-4 py-3.5 text-base font-medium text-[#29180C]'
