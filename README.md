@@ -33,8 +33,13 @@ If the Supabase variables are unset, signup forms run in **demo mode**: submissi
 | Command | Description |
 | --- | --- |
 | `npm run dev` | Start the local dev server |
-| `npm run build` | Type-check and build for production into `dist/` |
+| `npm run check` | Lint + unit tests + production build in one pass (what CI runs) |
 | `npm run lint` | Run oxlint |
+| `npm test` | Unit tests (vitest) |
+| `npm run build` | Type-check and build for production into `dist/` |
+| `npm run e2e` | Playwright end-to-end tests |
+| `npm run og` | Render the 1200×630 social card into `public/og.png` |
+| `npm run shots` | Capture e2e screenshots |
 | `npm run preview` | Preview the production build locally |
 
 ## Windows build note

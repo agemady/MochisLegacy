@@ -10,7 +10,9 @@
     "test": "vitest run",
     "preview": "vite preview",
     "e2e": "playwright test",
-    "og": "playwright test e2e/og.spec.ts"
+    "shots": "playwright test e2e/screenshots.spec.ts",
+    "og": "playwright test e2e/og.spec.ts",
+    "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",
