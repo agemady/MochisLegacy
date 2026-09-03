@@ -23,6 +23,7 @@ describe('signup in demo mode (env unset)', () => {
   it('every submit function returns { ok: true, demo: true } without calling rpc', async () => {
     vi.stubEnv('VITE_SUPABASE_URL', undefined)
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', undefined)
+    vi.stubEnv('PROD', false)
     vi.resetModules()
     const s = await import('./signup')
     const results = await Promise.all([
@@ -32,6 +33,29 @@ describe('signup in demo mode (env unset)', () => {
       s.subscribe({ email: 's@x.co' }),
     ])
     for (const r of results) expect(r).toMatchObject({ ok: true, demo: true })
+  })
+})
+
+describe('signup in production with supabase unconfigured', () => {
+  it('returns ok:false with the offline message, not a fake success', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', undefined)
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', undefined)
+    vi.stubEnv('PROD', true)
+    vi.resetModules()
+    const s = await import('./signup')
+    const results = await Promise.all([
+      s.submitDogSignup({ ownerName: 'O', email: 'o@x.co', dogName: 'Rex' }),
+      s.submitVolunteer({ name: 'V', email: 'v@x.co' }),
+      s.submitPledge({ name: 'P', email: 'p@x.co' }),
+      s.subscribe({ email: 's@x.co' }),
+    ])
+    for (const r of results) {
+      expect(r).toEqual({
+        ok: false,
+        demo: false,
+        message: 'Sign-ups are temporarily offline. Please try again soon.',
+      })
+    }
   })
 })
 

@@ -47,8 +47,14 @@ const DEMO: SubmitResult = {
     'Demo mode. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to submit for real.',
 }
 
+const OFFLINE: SubmitResult = {
+  ok: false,
+  demo: false,
+  message: 'Sign-ups are temporarily offline. Please try again soon.',
+}
+
 async function rpc(name: string, args: Record<string, unknown>): Promise<SubmitResult> {
-  if (!supabase) return DEMO
+  if (!supabase) return import.meta.env.PROD ? OFFLINE : DEMO
   const { data, error } = await supabase.rpc(name, args)
   if (error) {
     return {
