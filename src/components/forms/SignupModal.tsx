@@ -26,9 +26,8 @@ import {
  * The landing page no longer renders a tabbed signup section; instead the
  * hero's three buttons open this modal with exactly one form at a time.
  * The dog / volunteer / pledge form bodies below are moved UNCHANGED from
- * SignupTabs.tsx, which remains in the tree (still wired into the old App
- * composition) until p1's new App.tsx lands and the legacy sections are
- * deleted. Each form submits through p7's src/lib/signup.ts RPC wrappers
+ * SignupTabs.tsx, which was deleted alongside the legacy sections once
+ * p1's new App.tsx landed. Each form submits through p7's src/lib/signup.ts RPC wrappers
  * and renders SubmitResult.message verbatim; the pledge form keeps its
  * not-yet-501(c)(3) notice.
  *
