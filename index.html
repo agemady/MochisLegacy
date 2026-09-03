@@ -14,6 +14,46 @@
 
     <title>Mochi's Legacy</title>
 
+    <!-- Structured data: Organization + kickoff Event (ruling 3: October 2 · Foothills Community Park, Shelter A, time TBA) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "NGO",
+            "@id": "https://mochislegacy.com/#organization",
+            "name": "Mochi's Legacy",
+            "url": "https://mochislegacy.com/",
+            "description": "Boulder, Colorado therapy dog nonprofit bringing comfort and joy to senior living communities, schools, and libraries.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Boulder",
+              "addressRegion": "CO",
+              "addressCountry": "US"
+            }
+          },
+          {
+            "@type": "Event",
+            "name": "Mochi's Legacy Kickoff",
+            "startDate": "2026-10-02",
+            "eventStatus": "https://schema.org/EventScheduled",
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "location": {
+              "@type": "Place",
+              "name": "Foothills Community Park — Shelter A",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Boulder",
+                "addressRegion": "CO",
+                "addressCountry": "US"
+              }
+            },
+            "organizer": { "@id": "https://mochislegacy.com/#organization" }
+          }
+        ]
+      }
+    </script>
+
     <!-- Open Graph (og:image to be added once artwork ships) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mochi's Legacy" />
