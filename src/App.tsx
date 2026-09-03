@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import SignupModal, { type SignupKind } from "./components/forms/SignupModal";
+import Roster from "./components/Roster";
 
 /**
  * App composition (pane w2:p1) — ruling 7 single-screen landing.
@@ -14,6 +15,11 @@ import SignupModal, { type SignupKind } from "./components/forms/SignupModal";
  */
 export default function App() {
   const [kind, setKind] = useState<SignupKind | null>(null);
+
+  // Unlisted dog-roster page — no nav link from the landing (ruling 7).
+  if (window.location.pathname.replace(/\/+$/, "") === "/roster") {
+    return <Roster />;
+  }
 
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800">
