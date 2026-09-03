@@ -1,32 +1,47 @@
-# React + TypeScript + Vite
+# Mochi's Legacy
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Public site for **Mochi's Legacy**, a therapy dog nonprofit based in Boulder, Colorado. Our dog squad brings comfort and joy to healthcare facilities, schools, and community events across Boulder.
 
-Currently, two official plugins are available:
+> **Note:** Pledges are not yet tax-deductible — our federal 501(c)(3) application is in flight.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- [Vite](https://vite.dev) + React + TypeScript
+- [Tailwind CSS v4](https://tailwindcss.com)
+- [lucide-react](https://lucide.dev) (icons)
+- [Supabase](https://supabase.com) (Postgres + auth; schema in [`supabase/schema.sql`](supabase/schema.sql))
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Quickstart
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+cp .env.example .env   # then fill in your Supabase project values
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL (Dashboard → Project Settings → API) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `VITE_EVENT_CODE` | Code for the current public event flow |
+
+If the Supabase variables are unset, signup forms run in **demo mode**: submissions are validated and acknowledged but not persisted (see `src/lib/supabase.ts` and `src/lib/signup.ts`).
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the local dev server |
+| `npm run build` | Type-check and build for production into `dist/` |
+| `npm run lint` | Run oxlint |
+| `npm run preview` | Preview the production build locally |
+
+## Windows build note
+
+Vite 8 (rolldown), lightningcss, and Tailwind v4 (oxide) load platform-specific native binaries. npm can silently skip these optional transitive dependencies ([npm/cli#4828](https://github.com/npm/cli/issues/4828)), so the Windows x64 binaries are pinned as `devDependencies` — do not remove them.
+
+## Deployment
+
+Target: **Cloudflare Pages** connected to `main` — build command `npm run build`, output directory `dist`. Production domain: [mochislegacy.com](https://mochislegacy.com).
