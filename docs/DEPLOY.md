@@ -32,7 +32,6 @@ Set these on the Pages project (**Settings → Environment variables**) for **Pr
 | `NODE_VERSION` | `22` |
 | `VITE_SUPABASE_URL` | Dedicated Mochi's Legacy project URL (`https://<ref>.supabase.co`) |
 | `VITE_SUPABASE_ANON_KEY` | That project's **anon public** key |
-| `VITE_EVENT_CODE` | Kickoff event code if the schema still keys signups by event. Must match the Oct 2 Foothills Shelter A row. `.env.example` still says `E-TBA-001` until that code is assigned. |
 
 - The anon key is public by design. It may only `EXECUTE` the signup RPCs. Never add `service_role` (or any other secret) to Pages.
 - Do not commit real values. Local copies live in `.env` (gitignored); the shape is in `.env.example`.

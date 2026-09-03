@@ -6,7 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Mochi's Legacy is a Boulder, Colorado therapy dog nonprofit bringing joy to senior living communities, schools, and libraries. Meet the squad and get involved." />
     <meta name="theme-color" content="#fffbeb" />
+
+    <!-- Fraunces 600/700 for display headings (loaded with display=swap) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
+
     <title>Mochi's Legacy</title>
+
+    <!-- Structured data: Organization + kickoff Event (ruling 3: October 2 · Foothills Community Park, Shelter A, time TBA) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "NGO",
+            "@id": "https://mochislegacy.com/#organization",
+            "name": "Mochi's Legacy",
+            "url": "https://mochislegacy.com/",
+            "description": "Boulder, Colorado therapy dog nonprofit bringing comfort and joy to senior living communities, schools, and libraries.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Boulder",
+              "addressRegion": "CO",
+              "addressCountry": "US"
+            }
+          },
+          {
+            "@type": "Event",
+            "name": "Mochi's Legacy Kickoff",
+            "startDate": "2026-10-02",
+            "eventStatus": "https://schema.org/EventScheduled",
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "location": {
+              "@type": "Place",
+              "name": "Foothills Community Park — Shelter A",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Boulder",
+                "addressRegion": "CO",
+                "addressCountry": "US"
+              }
+            },
+            "organizer": { "@id": "https://mochislegacy.com/#organization" }
+          }
+        ]
+      }
+    </script>
 
     <!-- Open Graph (og:image to be added once artwork ships) -->
     <meta property="og:type" content="website" />

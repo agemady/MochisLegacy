@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { roster, type RosterDog, type RosterTier } from "../data/roster";
+import Header from "./Header";
+import Footer from "./Footer";
 
 const tierLabel: Record<RosterTier, string> = {
   gaggle: "Gaggle",
@@ -30,32 +32,42 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
 
 export default function Roster() {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-16">
-      <h1 className="text-3xl font-bold tracking-tight text-stone-800">
+    <div className="min-h-screen bg-amber-50 text-stone-800">
+      <Header />
+      <main className="mx-auto max-w-5xl px-4 py-16">
+        <a
+          href="/"
+          className="text-sm font-medium text-amber-700 hover:text-amber-800"
+        >
+          ← Back to home
+        </a>
+        <h1 className="mt-6 text-3xl font-bold tracking-tight text-stone-800">
         The roster
       </h1>
-      <p className="mt-2 max-w-2xl text-stone-600">
+        <p className="mt-2 max-w-2xl text-stone-600">
         Gaggle of Goldens community walks are step one; from there a dog can
         become a therapy candidate and then a certified therapy dog.
       </p>
-      <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {roster.map((dog: RosterDog) => (
-          <li
-            key={dog.id}
-            className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-amber-100"
-          >
-            <RosterPhoto id={dog.id} name={dog.name} />
-            <div className="mt-2 flex items-center justify-between gap-2">
-              <span className="truncate font-medium text-stone-800">
-                {dog.name}
-              </span>
-              <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
-                {tierLabel[dog.tier]}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </main>
+            <li
+              key={dog.id}
+              className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-amber-100"
+            >
+              <RosterPhoto id={dog.id} name={dog.name} />
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <span className="truncate font-medium text-stone-800">
+                  {dog.name}
+                </span>
+                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
+                  {tierLabel[dog.tier]}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </main>
+      <Footer />
+    </div>
   );
 }

@@ -4,9 +4,29 @@ Living plan, partitioned into small slices. One slice = one owner = disjoint pat
 
 **Pull rule.** When your slice lands, take the top **Ready** slice in your lane, append one line to `.scratch/claims.md` (`<pane> claims <id> <UTC time>`), and start. The overseer reconciles the board; if two panes claim the same id, the earlier line wins and the other takes the next one. Never edit this file yourself.
 
+**Message board.** `D:/projects/MochisLegacy/.scratch/board.md` (absolute path, shared by both worktrees, append-only). Post interface contracts, heads-ups on shared types, done notices with hashes, and lane-to-lane questions (`@p7 ...`). Read its tail when you start a slice and before you commit. Only the overseer assigns work; disagreements get one post tagged `@p8`.
+
+**Live previews (Herdr tab "live", never stop these).** Landing on main: http://127.0.0.1:5173 · Scheduling branch: http://127.0.0.1:5174 · Both are Vite dev servers with hot reload, so saved edits show immediately. Nothing is pushed to GitHub yet by founder decision.
+
 **Lanes.** `landing` = main branch, `D:/projects/MochisLegacy`. `sched` = branch `scheduling`, worktree `D:/projects/MochisLegacy-scheduling`. Reviewers do not claim slices.
 
-## In progress
+## In progress (rulings 11 + 12 round)
+
+| Id | Lane | Pane | Slice |
+|---|---|---|---|
+| L-modal-cut | landing | p4 | Ruling 12: native `<dialog>`, hoisted submit state, uncontrolled amount; release `Newsletter.tsx` to p9 |
+| L-chrome-cut | landing | p9 | Ruling 12: inline LineupPlaceholder + Newsletter, buttons from array, delete `Header.tsx`, CSS + comment cleanup; then L-og |
+| L-app-cut | landing | p1 | Remove `<Header />` from App, Roster keeps its own back link; modal hash matching exact only; then S-shell |
+| L-lib | landing | p7 | Finish ruling 10 items; remove `isSupabaseConfigured` if unused; then L-lazy |
+| L-docs-cut | landing | p3 | README / RUNBOOK / DEPLOY / supabase README: delete duplicated sections, one home per fact; add `og:image` once `public/og.png` exists |
+| L-e2e | landing | pF | landing.spec.ts, screenshots.spec.ts, `npm run shots` |
+| S-schema | sched | pG | Ruling 11 `supabase/schedule.sql`: four tables, RLS, owner/admin policies, seed comment for the Oct 2 walk |
+| S-seed | sched | pH | `supabase/schedule-seed.sql` template: Oct 2 walk row, example people/dogs rows for the 11 kickoff dogs with placeholder emails, instructions |
+| S-tiers | sched | pD | tiers.ts + tests (then S-rsvp-ui) |
+| S-checkin | sched | pE | checkin.ts + tests (then S-checkin-ui) |
+| S-design-cut | sched | pB | Rewrite `docs/scheduling/DESIGN.md` to ruling 11 (delete cut sections; keep goals, 4 tables, 2 screens, auth, open questions) |
+
+## Older in-progress table (superseded)
 
 | Id | Lane | Pane | Slice |
 |---|---|---|---|
@@ -34,11 +54,10 @@ Living plan, partitioned into small slices. One slice = one owner = disjoint pat
 
 | Id | Lane | Waiting on | Slice |
 |---|---|---|---|
-| S-schema | sched | overseer ruling on `.scratch/review-scheduling-design.md` | SQL delta for walks, rsvps, check-ins, roster tiers |
-| S-shell | sched | same ruling (same app vs separate) | `/schedule` route shell, auth gate, SignIn wiring |
-| S-walks | sched | S-schema | Founder "publish a walk" screen |
-| S-rsvp-ui | sched | S-schema, S-rsvp | Owner RSVP bottom sheet |
-| S-checkin-ui | sched | S-schema, S-checkin | Founder day-of check-in screen |
+| S-shell | sched | L-app-cut (p1 takes it) | Route switch tolerant of auth callbacks, `/schedule` + `/checkin` lazy routes, auth gate using `auth.ts`, SignIn wiring |
+| S-rsvp-ui | sched | S-schema, S-shell | `/schedule`: walk details, capacity, RSVP with dog picker + waiver/photo checkboxes, inline "you're walking" + opt-out (uses `rsvp.ts`, `time.ts`) |
+| S-checkin-ui | sched | S-schema, S-shell | `/checkin` admin list: check-in / opt-out (uses `checkin.ts`) |
+| S-roster-db | sched | S-schema | `/roster` reads `dogs` instead of `roster.ts` |
 | L-supabase | landing | founder creates the Supabase project | Apply `schema.sql`, run `verify.sql`, set env in Cloudflare |
 | L-deploy | landing | founder's Cloudflare account | First Pages deploy of `mochislegacy.com` |
 | L-email | landing | founder decision | Confirmation email on signup (edge function + provider) |

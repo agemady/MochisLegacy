@@ -25,7 +25,6 @@ npm run dev
 | --- | --- |
 | `VITE_SUPABASE_URL` | Supabase project URL (Dashboard → Project Settings → API) |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
-| `VITE_EVENT_CODE` | Code for the current public event flow |
 
 If the Supabase variables are unset, signup forms run in **demo mode**: submissions are validated and acknowledged but not persisted (see `src/lib/supabase.ts` and `src/lib/signup.ts`).
 

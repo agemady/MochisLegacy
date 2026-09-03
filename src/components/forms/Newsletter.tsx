@@ -29,7 +29,9 @@ export default function Newsletter() {
         onSubmit={handleSubmit}
         className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
       >
-        <p className="text-sm text-stone-600 sm:shrink-0">Squad news, occasionally.</p>
+        <p className="text-sm text-stone-600 sm:shrink-0">
+          Squad news and the October kickoff.
+        </p>
         <input
           type="email"
           name="email"
@@ -47,7 +49,7 @@ export default function Newsletter() {
           {pending ? (
             <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
           ) : (
-            "Notify me"
+            "Subscribe"
           )}
         </button>
       </form>

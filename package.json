@@ -17,17 +17,19 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
-  "devDependencies": {
+  "optionalDependencies": {
     "@oxlint/binding-win32-x64-msvc": "^1.81.0",
-    "@playwright/test": "^1.57.0",
     "@rolldown/binding-win32-x64-msvc": "^1.2.7",
     "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
+    "lightningcss-win32-x64-msvc": "^1.32.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
     "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
