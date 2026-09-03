@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "../lib/auth";
 import { getSupabase } from "../lib/supabase";
 import SignIn from "../components/SignIn";
+import PageTop from "../components/PageTop";
 
 /**
  * /checkin — admin-gated day-of check-in shell (slice S-shell, pane w2:p1).
@@ -47,6 +48,7 @@ export default function CheckinPage() {
   if (!session) {
     return (
       <div className="mx-auto max-w-md p-6">
+        <PageTop />
         <SignIn />
       </div>
     );
@@ -54,16 +56,20 @@ export default function CheckinPage() {
 
   if (!isAdmin) {
     return (
-      <p className="p-6 text-stone-600">
-        Check-in is for walk admins. Ask an admin to add you to the people
-        table with is_admin.
-      </p>
+      <div className="p-6">
+        <PageTop />
+        <p className="mt-6 text-stone-600">
+          Check-in is for walk admins. Ask an admin to add you to the people
+          table with is_admin.
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <h1 className="text-xl font-semibold text-stone-800">Day-of check-in</h1>
+      <PageTop />
+      <h1 className="mt-6 text-xl font-semibold text-stone-800">Day-of check-in</h1>
       <p className="mt-2 text-stone-600">
         The check-in roster UI is being built (slice S-checkin-ui). You are
         signed in as an admin.
