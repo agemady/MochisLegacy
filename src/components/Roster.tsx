@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { roster, type RosterDog, type RosterTier } from "../data/roster";
 import { listRosterDogs } from "../lib/schedule";
 import Footer from "./Footer";
+import PageTop from "./PageTop";
 
 const tierLabel: Record<RosterTier, string> = {
   gaggle: "Gaggle",
@@ -14,7 +15,7 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
     return (
-      <div className="flex aspect-[4/3] items-center justify-center rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/60 text-sm text-stone-400">
+      <div className="flex aspect-[4/3] items-center justify-center rounded-lg border-2 border-dashed border-[#E8CFA0] bg-[#FFF8EB] text-sm italic text-[#A98B65]">
         photo coming
       </div>
     );
@@ -25,7 +26,7 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
       alt={`Photo of ${name}`}
       onError={() => setFailed(true)}
       loading="lazy"
-      className="aspect-[4/3] w-full rounded-xl object-cover"
+      className="aspect-[4/3] w-full rounded-lg object-cover"
     />
   );
 }
@@ -40,33 +41,26 @@ export default function Roster() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-amber-50 text-stone-800">
+    <div className="min-h-screen bg-[#FDFBF7] text-[#29180C]">
       <main className="mx-auto max-w-5xl px-4 py-16">
-        <a
-          href="/"
-          className="text-sm font-medium text-amber-700 hover:text-amber-800"
-        >
-          ← Back to home
-        </a>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-stone-800">
-        The roster
-      </h1>
-        <p className="mt-2 max-w-2xl text-stone-600">
-        Gaggle of Goldens community walks are step one; from there a dog can
-        become a therapy candidate and then a certified therapy dog.
-      </p>
-        <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <PageTop
+          title="The roster"
+          lede="Gaggle of Goldens community walks are step one; from there a dog can become a therapy candidate and then a certified therapy dog."
+        />
+        <ul className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {dogs.map((dog: RosterDog) => (
             <li
               key={dog.id}
-              className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-amber-100"
+              className="rounded-[1.25rem] border border-[#E8CFA0] bg-white/90 p-2 shadow-[0_10px_24px_-16px_rgba(180,83,9,0.45)]"
             >
-              <RosterPhoto id={dog.id} name={dog.name} />
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="truncate font-medium text-stone-800">
+              <div className="rounded-lg ring-1 ring-[#E8CFA0] ring-offset-2 ring-offset-[#FDFBF7]">
+                <RosterPhoto id={dog.id} name={dog.name} />
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-2 px-1 pb-1">
+                <span className="truncate font-medium text-[#29180C]">
                   {dog.name}
                 </span>
-                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
+                <span className="shrink-0 rounded-full border border-[#F0DCAE] bg-[#FBEED3] px-2 py-0.5 text-xs font-medium text-[#B45309]">
                   {tierLabel[dog.tier]}
                 </span>
               </div>
