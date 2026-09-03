@@ -1,6 +1,6 @@
 # Mochi's Legacy
 
-Public site for **Mochi's Legacy**, a therapy dog nonprofit based in Boulder, Colorado. Our dog squad brings comfort and joy to healthcare facilities, schools, and community events across Boulder.
+Public site for **Mochi's Legacy**, a therapy dog nonprofit based in Boulder, Colorado. Our dog squad brings comfort and joy to senior living communities, schools, and libraries across Boulder.
 
 > **Note:** Pledges are not yet tax-deductible — our federal 501(c)(3) application is in flight.
 
