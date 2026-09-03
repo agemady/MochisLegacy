@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
@@ -16,6 +16,21 @@ import Roster from "./components/Roster";
 export default function App() {
   const [kind, setKind] = useState<SignupKind | null>(null);
 
+  // Flyer QR deep links: /#dog, /#volunteer, /#pledge open the matching form.
+  useEffect(() => {
+    const fromHash = () => {
+      const h = window.location.hash.slice(1);
+      if (h === "dog" || h === "volunteer" || h === "pledge") setKind(h);
+    };
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, []);
+  const closeSignup = () => {
+    setKind(null);
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  };
+
   // Unlisted dog-roster page — no nav link from the landing (ruling 7).
   if (window.location.pathname.replace(/\/+$/, "") === "/roster") {
     return <Roster />;
@@ -28,7 +43,7 @@ export default function App() {
         <Hero onOpen={setKind} />
       </main>
       <Footer />
-      <SignupModal kind={kind} onClose={() => setKind(null)} />
+      <SignupModal kind={kind} onClose={closeSignup} />
     </div>
   );
 }
