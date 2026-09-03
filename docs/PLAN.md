@@ -4,6 +4,8 @@ Living plan, partitioned into small slices. One slice = one owner = disjoint pat
 
 **Pull rule.** When your slice lands, take the top **Ready** slice in your lane, append one line to `.scratch/claims.md` (`<pane> claims <id> <UTC time>`), and start. The overseer reconciles the board; if two panes claim the same id, the earlier line wins and the other takes the next one. Never edit this file yourself.
 
+**Message board.** `D:/projects/MochisLegacy/.scratch/board.md` (absolute path, shared by both worktrees, append-only). Post interface contracts, heads-ups on shared types, done notices with hashes, and lane-to-lane questions (`@p7 ...`). Read its tail when you start a slice and before you commit. Only the overseer assigns work; disagreements get one post tagged `@p8`.
+
 **Lanes.** `landing` = main branch, `D:/projects/MochisLegacy`. `sched` = branch `scheduling`, worktree `D:/projects/MochisLegacy-scheduling`. Reviewers do not claim slices.
 
 ## In progress

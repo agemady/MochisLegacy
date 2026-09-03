@@ -50,4 +50,5 @@ Not urgent, but key once walks and events start. Lives on its own branch in its 
 - Claim a ticket by assigning it before touching files; refer to tickets by name.
 - Only the overseer steers other panes. Objections go to the overseer, not to other agents.
 - Reviewers never edit source. Their findings go to `.scratch/review-*.md`; the overseer adjudicates and hands trims to the file owner. Less code wins: a finding that deletes lines outranks one that adds them.
+- Workboard is `docs/PLAN.md`; message board is `D:/projects/MochisLegacy/.scratch/board.md` (append-only, contracts and heads-ups, no directing other panes).
 - Sessions are disposable: spawned per task, exited when done. Builders are Grok 4.6 fast (high) or GLM 5.3 flash; reviewers are Gemini 3.8 flash or Muse Spark 1.3; large judgment calls are the overseer's.
