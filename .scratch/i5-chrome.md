@@ -36,3 +36,22 @@ Tall phone ≈ iPhone 12–15 (390×844). Compact stack so photo top *and* the f
 ## Build
 
 `npm run build` green after this trim. Commit is explicit-path only (no `git add -A`).
+
+---
+
+# Ruling 9 — feel-good chrome (visual only; copy waits on design review)
+
+Pane `w2:p9`. Paths: `Hero.tsx`, `LineupPlaceholder.tsx`, `src/index.css`. Header/Footer untouched. No new deps. Ruling 8 copy and three-button structure kept.
+
+| Sure thing | What landed |
+|---|---|
+| Mood layer | Static top-ellipse amber radial (`rgba(251,191,36,0.16)` → transparent). No animation, no blend modes. |
+| One paw | Single `-rotate-[18deg]` print above the H1 (not a trail). Empty lineup slot still uses one paw as the missing-art mark. |
+| Display H1 | `text-5xl / sm:text-6xl / md:text-7xl`, leading 1.05. |
+| Hero photo frame | `rounded-3xl` + warm soft shadow + amber ring. Caption under the frame (ruling-8 sentence until new copy). Inner dashed text removed so it isn't doubled. |
+| Motion | `animate-fade-up` on the hero stack; button `hover:-translate-y-0.5` + shadow. Both behind `motion-safe:`. `prefers-reduced-motion` also kills `html` smooth-scroll. |
+| Buttons | Same labels; Dog / HandHeart / HeartHandshake; primary solid amber; hover lift. |
+
+Held for copy review: two-sentence Mochi story, warm kickoff invite, “what we do” line.
+
+Fold: extra paw (~24px) + larger H1 (~12–24px) + caption (~24px) ≈ 510px to first-button bottom at 390 — still inside a tall-phone viewport.
