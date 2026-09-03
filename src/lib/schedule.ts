@@ -73,6 +73,7 @@ async function requireAdmin(): Promise<Result<true>> {
 async function patchRsvp(
   walkId: string, dogId: string, patch: Partial<WalkRsvp>, missing: string, done: string, admin: boolean,
 ): Promise<Result<WalkRsvp>> {
+  if (!admin && 'checked_in_at' in patch) delete patch.checked_in_at
   const supabase = await getSupabase()
   if (!supabase) {
     const row = rowOf(rsvps, walkId, dogId)
@@ -105,13 +106,15 @@ export async function getMyDogs(): Promise<Result<Dog[]>> {
   if (!supabase) return ok(dogs, 'Demo mode')
   const { data: pid, error: pidErr } = await supabase.rpc('current_person_id')
   if (pidErr || !pid) return fail('Sign in to see your dogs.')
-  const { data, error } = await supabase.from('dogs').select('*').eq('owner_id', pid)
+  const { data, error } = await supabase.from('dogs').select('*').eq('owner_id', pid).eq('status', 'active')
   return error ? fail('Unable to load dogs right now.') : ok((data ?? []) as Dog[], 'OK')
 }
 
 export async function getMyRsvps(walkId: string): Promise<Result<WalkRsvp[]>> {
   const mine = await getMyDogs()
-  if (!mine.ok || !mine.data) return fail(mine.message)
+  if (!mine.ok || !mine.data) {
+    return mine.message.startsWith('Sign in') ? ok([], mine.message) : fail(mine.message)
+  }
   const ids = new Set(mine.data.map((d) => d.id))
   const all = await loadRsvps(walkId)
   if (!all.ok || !all.data) return fail(all.message)
@@ -127,20 +130,22 @@ export async function rsvp(
   if (!all.ok || !all.data) return fail(all.message)
   const existing = rowOf(all.data, walkId, dogId)
   if (existing && !existing.opted_out_at) return fail('That dog is already on this walk.')
+  // Waitlist vs cap uses every active RSVP on this walk (rsvps_select_published).
   const placed = placeRsvp({ cap: w.data.cap }, libRsvps(all.data, w.data.cap), dogId)
   if (!placed.ok) return fail('That dog is already on this walk.')
   const message = placed.status === 'waitlisted' ? `You're on the waitlist (#${placed.position}).` : "You're walking."
-  const next: WalkRsvp = {
+  const payload = {
     walk_id: walkId, dog_id: dogId, waiver_signed: consents.waiverSigned, photo_consent: consents.photoConsent,
-    checked_in_at: null, opted_out_at: null, created_at: iso(),
+    opted_out_at: null, created_at: iso(),
   }
   const supabase = await getSupabase()
   if (!supabase) {
+    const next: WalkRsvp = { ...payload, checked_in_at: existing?.checked_in_at ?? null }
     if (existing) Object.assign(existing, next)
     else rsvps = [...rsvps, next]
     return ok(existing ?? next, message)
   }
-  const { data, error } = await supabase.from('walk_rsvps').upsert(next, { onConflict: 'walk_id,dog_id' }).select().single()
+  const { data, error } = await supabase.from('walk_rsvps').upsert(payload, { onConflict: 'walk_id,dog_id' }).select().single()
   return error ? fail('Unable to RSVP right now.') : ok(data as WalkRsvp, message)
 }
 
@@ -149,9 +154,7 @@ export async function optOut(walkId: string, dogId: string): Promise<Result<Walk
 }
 
 export async function listRsvpsForWalk(walkId: string): Promise<Result<WalkRsvp[]>> {
-  if (!(await getSupabase())) return ok(rsvps.filter((r) => r.walk_id === walkId), 'Demo mode')
-  const gate = await requireAdmin()
-  return gate.ok ? loadRsvps(walkId) : fail(gate.message)
+  return loadRsvps(walkId)
 }
 
 export async function checkIn(walkId: string, dogId: string): Promise<Result<WalkRsvp>> {
