@@ -25,6 +25,12 @@
 | `w2:p9` | Grok 4.6 fast | **chrome**: `src/components/Header.tsx`, `Hero.tsx`, `LineupPlaceholder.tsx`, `Footer.tsx`, `src/index.css`; mobile pass on those files |
 | `w2:pA` | Gemini 3.8 flash | **Reviewer tech-debt**: no source edits; output `.scratch/review-arch.md` (what hurts in three months, smallest fix, now vs defer) |
 | `w2:p8` | Fable | Overseer. Pushes to `origin/main`. Steers panes. Posts rulings on the map |
+| `w2:pB` | Gemini 3.8 flash | **Designer scheduling** (worktree, branch `scheduling`): `docs/scheduling/DESIGN.md` only |
+| `w2:pD` | GLM 5.3 flash | **unit-tests**: `src/lib/signup.test.ts`; one `package.json` change (vitest + `test` script), committed first |
+| `w2:pE` | GLM 5.3 flash | **supabase-ops**: `supabase/README.md`, `supabase/verify.sql` |
+| `w2:pF` | GLM 5.3 flash | **e2e**: `playwright.config.ts`, `e2e/`; one `package.json` change (@playwright/test + `e2e` script) after pD's commit |
+| `w2:pG` | Grok 4.6 fast | **welfare** (worktree, branch `scheduling`): `src/lib/welfare.ts`, `src/lib/welfare.test.ts` |
+| `w2:pH` | Grok 4.6 fast | **auth** (worktree, branch `scheduling`): `src/lib/auth.ts`, `src/components/SignIn.tsx` |
 
 ## Scheduling track (branch `scheduling`, worktree `D:/projects/MochisLegacy-scheduling`)
 
@@ -34,7 +40,7 @@ Not urgent, but key once walks and events start. Lives on its own branch in its 
 
 - One shared working copy, `main`. Commit **only your own paths** (`git add <file>...`), never `git add -A` / `git commit -a`. Never `push`, `checkout`, `reset`, `stash`, or `rebase`.
 - `npm run build` must be green before you commit.
-- Do not touch `package.json` / lockfile (build is done).
+- Do not touch `package.json` / lockfile except the two granted one-shot changes (pD vitest, then pF playwright). p3 adds the CI steps afterwards.
 - Claim a ticket by assigning it before touching files; refer to tickets by name.
 - Only the overseer steers other panes. Objections go to the overseer, not to other agents.
 - Reviewers never edit source. Their findings go to `.scratch/review-*.md`; the overseer adjudicates and hands trims to the file owner. Less code wins: a finding that deletes lines outranks one that adds them.
