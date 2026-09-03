@@ -53,6 +53,24 @@ const OFFLINE: SubmitResult = {
   message: 'Sign-ups are temporarily offline. Please try again soon.',
 }
 
+const FRIENDLY_ERRORS = new Set([
+  'email is required',
+  'invalid email address',
+  'owner name is required',
+  'dog name is required',
+  'name is required',
+  'a field is too long',
+  'frequency must be one-time, monthly, or yearly',
+  'pledge amount cannot be negative',
+])
+
+const FALLBACK_ERROR = 'Unable to submit right now. Please try again or email us.'
+
+function sanitizeError(raw: string | undefined): string {
+  const message = (raw ?? '').trim()
+  return FRIENDLY_ERRORS.has(message) ? message : FALLBACK_ERROR
+}
+
 async function rpc(name: string, args: Record<string, unknown>): Promise<SubmitResult> {
   if (!supabase) return import.meta.env.PROD ? OFFLINE : DEMO
   const { data, error } = await supabase.rpc(name, args)
@@ -60,7 +78,7 @@ async function rpc(name: string, args: Record<string, unknown>): Promise<SubmitR
     return {
       ok: false,
       demo: false,
-      message: error.message || 'Something went wrong — please try again.',
+      message: sanitizeError(error.message),
     }
   }
   return {

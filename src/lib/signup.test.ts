@@ -78,10 +78,21 @@ describe('signup with env set (supabase mocked)', () => {
     expect(Object.keys(rpc.mock.calls[0][1] as object).sort()).toEqual([...keys].sort())
   })
 
-  it('returns ok:false with a message when rpc errors', async () => {
+  it('passes through friendly RPC validation messages', async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: 'invalid email address' } })
+    const s = (await import('./signup')) as typeof import('./signup')
+    const res = await s.subscribe({ email: 'nope' })
+    expect(res).toMatchObject({ ok: false, demo: false, message: 'invalid email address' })
+  })
+
+  it('sanitizes unexpected rpc errors to a generic fallback', async () => {
     rpc.mockResolvedValueOnce({ data: null, error: { message: 'row-level security blocked insert' } })
     const s = (await import('./signup')) as typeof import('./signup')
     const res = await s.subscribe({ email: 's@x.co' })
-    expect(res).toMatchObject({ ok: false, demo: false, message: 'row-level security blocked insert' })
+    expect(res).toMatchObject({
+      ok: false,
+      demo: false,
+      message: 'Unable to submit right now. Please try again or email us.',
+    })
   })
 })
