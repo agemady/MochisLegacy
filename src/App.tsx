@@ -37,7 +37,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50 text-stone-800">
+    <div className="min-h-screen">
       <main>
         <Hero onOpen={setKind} />
       </main>
