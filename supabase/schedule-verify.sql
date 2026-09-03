@@ -7,6 +7,7 @@
 --   3. is_admin can select every probe row, including a draft walk.
 --   4. after-insert on auth.users links people.auth_user_id by lower(trim(email)).
 --   5. people.email unique; walks ends_at > starts_at and cap > 0.
+--   6. a people row inserted after the auth user still resolves via current_person_id() (JWT email).
 -- Probe rows are tagged ML-SCHEDULE-VERIFY and deleted at the end.
 
 create extension if not exists "pgcrypto";
@@ -24,6 +25,7 @@ declare
   v_other_auth uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002';
   v_admin_auth uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0003';
   v_link_auth uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0004';
+  v_late_auth uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0005';
   v_instance uuid := coalesce(
     (select instance_id from auth.users limit 1),
     '00000000-0000-0000-0000-000000000000'
@@ -32,6 +34,7 @@ declare
   v_other uuid;
   v_admin uuid;
   v_link uuid;
+  v_late uuid;
   v_owner_dog uuid;
   v_retired uuid;
   v_other_dog uuid;
@@ -58,6 +61,9 @@ begin
      now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now()),
     (v_instance, v_link_auth, 'authenticated', 'authenticated',
      'ml-schedule-verify-link@example.com', crypt('verify', gen_salt('bf')),
+     now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now()),
+    (v_instance, v_late_auth, 'authenticated', 'authenticated',
+     'ml-schedule-verify-late@example.com', crypt('verify', gen_salt('bf')),
      now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now());
 
   if (select auth_user_id from public.people where id = v_link) is distinct from v_link_auth then
@@ -76,6 +82,11 @@ begin
   insert into public.people (auth_user_id, name, email, is_admin)
   values (v_admin_auth, 'ML Verify Admin', 'ml-schedule-verify-admin@example.com', true)
   returning id into v_admin;
+
+  -- people row AFTER the auth user: trigger cannot fire; lazy JWT email link must resolve
+  insert into public.people (name, email, is_admin)
+  values ('ML Verify Late', 'ml-schedule-verify-late@example.com', true)
+  returning id into v_late;
 
   begin
     insert into public.people (name, email)
@@ -130,14 +141,14 @@ begin
   values (v_pub, v_other_dog, true, false);
 
   create temporary table if not exists ml_sv (
-    owner_auth uuid, other_auth uuid, admin_auth uuid,
-    owner_id uuid, other_id uuid, admin_id uuid,
+    owner_auth uuid, other_auth uuid, admin_auth uuid, late_auth uuid,
+    owner_id uuid, other_id uuid, admin_id uuid, late_id uuid,
     owner_dog uuid, retired_dog uuid, other_dog uuid, pub uuid, draft uuid
   );
   delete from ml_sv;
   insert into ml_sv values (
-    v_owner_auth, v_other_auth, v_admin_auth,
-    v_owner, v_other, v_admin,
+    v_owner_auth, v_other_auth, v_admin_auth, v_late_auth,
+    v_owner, v_other, v_admin, v_late,
     v_owner_dog, v_retired, v_other_dog, v_pub, v_draft
   );
 end $$;
@@ -333,6 +344,40 @@ begin
 end $$;
 
 -- ============================================================
+-- 2b. people row inserted AFTER auth user still resolves (R3)
+-- ============================================================
+reset role;
+
+select set_config('request.jwt.claim.sub', late_auth::text, false),
+       set_config(
+         'request.jwt.claims',
+         json_build_object(
+           'sub', late_auth,
+           'role', 'authenticated',
+           'email', 'ml-schedule-verify-late@example.com'
+         )::text,
+         false
+       )
+  from ml_sv;
+
+set role authenticated;
+
+do $$
+declare
+  v ml_sv%rowtype;
+begin
+  select * into v from ml_sv;
+  if public.current_person_id() is distinct from v.late_id then
+    raise exception 'FAIL: late people row did not resolve via JWT email (got %)',
+      public.current_person_id();
+  end if;
+  if not public.is_admin() then
+    raise exception 'FAIL: is_admin() false for late-linked admin';
+  end if;
+  raise notice 'PASS: people row inserted after auth user resolves via current_person_id()';
+end $$;
+
+-- ============================================================
 -- 3. is_admin sees every probe row
 -- ============================================================
 reset role;
@@ -356,8 +401,8 @@ begin
 
   select count(*) into n from public.people
     where email like 'ml-schedule-verify-%@example.com';
-  if n <> 4 then
-    raise exception 'FAIL: admin saw % probe people (want 4)', n;
+  if n <> 5 then
+    raise exception 'FAIL: admin saw % probe people (want 5)', n;
   end if;
   raise notice 'PASS: admin selects all probe people';
 

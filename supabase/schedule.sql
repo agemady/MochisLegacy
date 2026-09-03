@@ -82,7 +82,11 @@ stable
 security definer
 set search_path = public, auth, pg_temp
 as $$
-  select id from public.people where auth_user_id = auth.uid()
+  select id from public.people
+  where auth_user_id = auth.uid()
+     or (auth_user_id is null
+         and lower(trim(email)) = lower(trim(auth.jwt() ->> 'email')))
+  limit 1
 $$;
 
 create or replace function public.is_admin()
@@ -93,7 +97,7 @@ security definer
 set search_path = public, auth, pg_temp
 as $$
   select coalesce(
-    (select is_admin from public.people where auth_user_id = auth.uid()),
+    (select is_admin from public.people where id = public.current_person_id()),
     false
   )
 $$;
