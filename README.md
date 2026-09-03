@@ -1,8 +1,8 @@
 # Mochi's Legacy
 
-Public site for **Mochi's Legacy**, a therapy dog nonprofit based in Boulder, Colorado. Our dog squad brings comfort and joy to senior living communities, schools, and libraries across Boulder.
+Landing page (single screen) for **Mochi's Legacy**, a therapy dog nonprofit based in Boulder, Colorado. Our dog squad brings comfort and joy to senior living communities, schools, and libraries across Boulder.
 
-> **Note:** Pledges are not yet tax-deductible — our federal 501(c)(3) application is in flight.
+**What's on the page, top to bottom:** name + one-sentence mission; the kickoff line (**October 2 · Foothills Community Park, Shelter A**, time TBA); a full-width slot for the hero lineup photo — renders `/lineup.png` as soon as that image is dropped into `public/`, and until then shows a dashed "lineup portrait is coming" placeholder; **three big buttons** — *I have a dog*, *I want to volunteer*, *I want to support* — each opening its signup form in a modal; a one-field newsletter signup; a one-line footer (in memory of Mochi; not yet a 501(c)(3) — pledges are not tax-deductible).
 
 ## Stack
 
