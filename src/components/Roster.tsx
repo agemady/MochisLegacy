@@ -15,7 +15,7 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
     return (
-      <div className="flex aspect-[4/3] items-center justify-center rounded-lg border-2 border-dashed border-[#E8CFA0] bg-[#FFF8EB] text-sm italic text-[#A98B65]">
+      <div className="flex aspect-[4/3] items-center justify-center rounded-2xl border-2 border-dashed border-honey/40 bg-[#FFF8EB]/70 text-sm italic text-umber/60">
         photo coming
       </div>
     );
@@ -26,7 +26,7 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
       alt={`Photo of ${name}`}
       onError={() => setFailed(true)}
       loading="lazy"
-      className="aspect-[4/3] w-full rounded-lg object-cover"
+      className="aspect-[4/3] w-full rounded-2xl object-cover"
     />
   );
 }
@@ -41,7 +41,7 @@ export default function Roster() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#29180C]">
+    <div className="min-h-screen bg-ground text-espresso">
       <main className="mx-auto max-w-5xl px-4 py-16">
         <PageTop
           title="The roster"
@@ -51,16 +51,14 @@ export default function Roster() {
         {dogs.map((dog: RosterDog) => (
             <li
               key={dog.id}
-              className="rounded-[1.25rem] border border-[#E8CFA0] bg-white/90 p-2 shadow-[0_10px_24px_-16px_rgba(180,83,9,0.45)]"
+              className="rounded-3xl bg-[#FAF3E6] p-3 ring-1 ring-sandstone shadow-[0_10px_30px_-18px_rgba(41,24,12,0.35)]"
             >
-              <div className="rounded-lg ring-1 ring-[#E8CFA0] ring-offset-2 ring-offset-[#FDFBF7]">
-                <RosterPhoto id={dog.id} name={dog.name} />
-              </div>
+              <RosterPhoto id={dog.id} name={dog.name} />
               <div className="mt-2 flex items-center justify-between gap-2 px-1 pb-1">
-                <span className="truncate font-medium text-[#29180C]">
+                <span className="truncate font-medium text-espresso">
                   {dog.name}
                 </span>
-                <span className="shrink-0 rounded-full border border-[#F0DCAE] bg-[#FBEED3] px-2 py-0.5 text-xs font-medium text-[#B45309]">
+                <span className="shrink-0 rounded-full bg-[#FFF8EB] px-2 py-0.5 text-xs font-medium text-espresso">
                   {tierLabel[dog.tier]}
                 </span>
               </div>
