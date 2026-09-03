@@ -40,12 +40,12 @@ const KIND_META: Record<SignupKind, { label: string; blurb: string; action: stri
 };
 
 const inputCls =
-  "mt-1.5 w-full rounded-2xl border-[1.5px] border-[#E6CCA0] bg-white px-4 py-3 text-base text-[#29180C] shadow-xs placeholder:text-stone-400 focus:border-[#D97706] focus:outline-none focus:ring-3 focus:ring-[#D97706]/20 transition-all";
+  "mt-1.5 w-full rounded-2xl border border-[#E6CCA0] bg-white px-4 py-3 text-base text-espresso shadow-xs placeholder:text-umber/50 focus:border-honey focus:outline-none focus:ring-3 focus:ring-honey/25";
 
-const labelCls = "block text-sm font-semibold text-[#29180C]";
+const labelCls = "block text-sm font-semibold text-espresso";
 
 const submitBtnCls =
-  "inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#D97706] to-[#B45309] px-8 py-3.5 font-bold text-white shadow-[0_6px_18px_-3px_rgba(217,119,6,0.45)] hover:shadow-[0_10px_22px_-3px_rgba(217,119,6,0.55)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-honey to-honey-dark px-8 py-3.5 font-bold text-white shadow-[0_6px_18px_-3px_rgba(217,119,6,0.45)] motion-safe:transition-all motion-safe:hover:-translate-y-0.5 sm:w-auto disabled:opacity-50";
 
 // Error-only: successful submissions swap the form body for a SuccessCard.
 function FormStatus({ result }: { result: SubmitResult | null }) {
@@ -63,20 +63,20 @@ function FormStatus({ result }: { result: SubmitResult | null }) {
 function SuccessCard({ result, onClose }: { result: SubmitResult; onClose: () => void }) {
   return (
     <div role="status" className="flex flex-col items-center gap-3 py-8 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-full border border-[#F3D9A2] bg-[#FFF3D6] text-[#D97706]">
-        <PawPrint className="h-7 w-7" aria-hidden />
+      <span className="flex h-16 w-16 items-center justify-center rounded-full border border-sandstone bg-[#fff3d6] text-honey">
+        <PawPrint className="h-8 w-8" aria-hidden />
       </span>
-      <p className="font-display text-3xl font-bold text-[#29180C]">You&rsquo;re in!</p>
-      <p className="max-w-sm text-sm leading-relaxed text-[#6B5545]">{result.message}</p>
+      <p className="font-display text-3xl font-bold text-espresso">You&rsquo;re on the team!</p>
+      <p className="max-w-sm text-sm leading-relaxed text-umber">{result.message}</p>
       {result.demo && (
-        <p className="text-xs font-medium uppercase tracking-wide text-[#6B5545]/70">
+        <p className="text-xs font-medium uppercase tracking-wide text-umber/70">
           Demo run — nothing was saved
         </p>
       )}
       <button
         type="button"
         onClick={onClose}
-        className="mt-2 rounded-full border-2 border-[#E6CCA0] bg-white px-8 py-2.5 font-bold text-[#29180C] transition-colors hover:bg-[#FFF8EB]"
+        className="mt-2 rounded-full border-2 border-[#E6CCA0] bg-white px-8 py-2.5 font-bold text-espresso transition-colors hover:bg-[#fff8eb]"
       >
         Close
       </button>
@@ -160,7 +160,7 @@ function PledgeFields() {
       <label>
         <span className={labelCls}>Pledge amount (USD)</span>
         <div className="relative">
-          <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-stone-400">
+          <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-umber">
             $
           </span>
           <input
@@ -173,7 +173,7 @@ function PledgeFields() {
             className={`${inputCls} pl-7`}
           />
         </div>
-        <p className="mt-1.5 text-xs leading-relaxed text-[#6B5545]">
+        <p className="mt-1.5 text-xs leading-relaxed text-umber">
           We&rsquo;re not yet a 501(c)(3), so pledges are not tax-deductible.
         </p>
       </label>
@@ -262,14 +262,14 @@ export default function SignupModal({
       onMouseDown={(e) => {
         if (e.target === dialogRef.current) close();
       }}
-      className="m-auto flex h-[100dvh] w-full max-w-2xl flex-col border border-[#F3D9A2] bg-[#FDFBF7] shadow-[0_25px_70px_-15px_rgba(41,24,12,0.35)] backdrop:bg-[#29180C]/50 backdrop:backdrop-blur-xs sm:h-auto sm:max-h-[90vh] sm:rounded-[2rem]"
+      className="open:flex mb-0 mt-auto h-auto max-h-[92dvh] w-full max-w-2xl flex-col bg-[#fff8eb] ring-1 ring-sandstone shadow-[0_25px_70px_-15px_rgba(41,24,12,0.35)] backdrop:bg-espresso/55 backdrop:backdrop-blur-[2px] rounded-t-3xl sm:m-auto sm:max-h-[90vh] sm:rounded-3xl"
     >
       <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 sm:px-10 sm:pt-10">
         <div className="flex items-center gap-2.5">
-          <PawPrint className="h-6 w-6 text-[#D97706]" aria-hidden />
+          <PawPrint className="h-6 w-6 text-honey" aria-hidden />
           <h2
             id="signup-modal-title"
-            className="font-display text-2xl font-bold tracking-tight text-[#29180C] sm:text-3xl"
+            className="font-display text-3xl font-bold tracking-tight text-espresso"
           >
             {meta?.label}
           </h2>
@@ -278,15 +278,15 @@ export default function SignupModal({
           type="button"
           onClick={close}
           aria-label="Close"
-          className="rounded-full p-2 text-[#6B5545] transition-colors hover:bg-[#FFF8EB] hover:text-[#29180C]"
+          className="rounded-full p-2 text-umber/70 transition-colors hover:bg-[#fff3d6] hover:text-espresso"
         >
           <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-3 sm:px-10 sm:pb-10 sm:pt-4">
+      <div className="flex-initial min-h-0 overflow-y-auto px-6 pb-6 pt-3 sm:px-10 sm:pb-10 sm:pt-4">
         {meta && (
-          <p className="mb-5 text-sm leading-relaxed text-[#6B5545]">{meta.blurb}</p>
+          <p className="mb-5 text-sm leading-relaxed text-umber">{meta.blurb}</p>
         )}
 
         {result?.ok ? (
