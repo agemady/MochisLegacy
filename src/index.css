@@ -26,28 +26,14 @@
       #fffbeb 42%,
       #fff7ed 100%
     );
-    scroll-behavior: smooth;
   }
 
   body {
     @apply text-stone-800 antialiased selection:bg-amber-200;
     background: transparent;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* keep anchor targets clear of the sticky header */
-  section[id] {
-    scroll-margin-top: 4.5rem;
-  }
-
-  /* p1's App shell is solid amber-50 — let the html wash show through */
   #root > .min-h-screen {
     background-color: transparent;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
   }
 }
