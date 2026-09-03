@@ -1,4 +1,4 @@
-import { PawPrint, CalendarDays, Dog, HandHeart, HeartHandshake } from "lucide-react";
+import { Dog, HandHeart, HeartHandshake, PawPrint } from "lucide-react";
 import LineupPlaceholder from "./LineupPlaceholder";
 import type { SignupKind } from "./forms/SignupModal";
 
@@ -7,49 +7,56 @@ interface HeroProps {
   onOpen: (kind: SignupKind) => void;
 }
 
+/** Equal height; lift is motion-safe only. Primary stays solid amber. */
+const btn =
+  "flex h-12 w-full items-center justify-center gap-2.5 rounded-full border-2 px-6 text-base font-semibold motion-safe:transition-[transform,box-shadow,background-color] motion-safe:duration-150 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md";
+
 export default function Hero({ onOpen }: HeroProps) {
   return (
-    <section id="top" className="relative overflow-hidden">
-      {/* soft gold glow accents */}
+    <section id="top" className="relative isolate">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.12),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.16),transparent_58%)]"
       />
-      <div className="relative mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-24">
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-amber-700">
-          In loving memory of Mochi
-        </p>
-
-        <h1 className="mt-5 text-4xl font-semibold tracking-tight text-stone-800 sm:text-5xl">
+      <div className="mx-auto max-w-3xl px-4 py-6 text-center motion-safe:animate-fade-up sm:px-6 sm:py-16">
+        <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-stone-800 sm:text-6xl md:text-7xl">
           Mochi's Legacy
         </h1>
 
-        {/* one-sentence mission */}
-        <p className="mx-auto mt-6 max-w-prose text-lg leading-relaxed text-stone-600">
-          Continuing the work of one very good golden retriever: volunteer
-          handler-and-dog Teams bringing comfort, connection, and a little joy
-          to senior living communities, schools, and libraries across the
-          Boulder area.
+        <div className="relative">
+          <PawPrint
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 -rotate-[18deg] text-amber-900 opacity-5"
+          />
+          <p className="relative mx-auto mt-3 max-w-prose text-base leading-snug text-stone-600 sm:mt-5 sm:text-lg sm:leading-relaxed">
+            A Boulder-area crew of volunteer dogs and handlers sharing comfort
+            and joy, one visit at a time.
+          </p>
+          <p className="relative mx-auto mt-3 max-w-prose text-base leading-snug text-stone-600 sm:text-lg sm:leading-relaxed">
+            One very good golden retriever showed us how much a visit from a
+            dog can mean. Mochi&apos;s Legacy keeps her at work, through every
+            wagging team that follows.
+          </p>
+          <p className="relative mx-auto mt-3 max-w-prose text-sm leading-snug text-stone-600 sm:text-base">
+            We organize volunteer handler-and-dog teams to visit senior living
+            communities, schools, and libraries.
+          </p>
+        </div>
+
+        <p className="mt-4 text-sm text-stone-700 sm:mt-6">
+          Kickoff · <span className="font-semibold">October 2</span> ·
+          Foothills Community Park, Shelter A — bring your dog, meet the squad.
         </p>
 
-        {/* kickoff line — founder-sourced (coordination doc, ruling 3); time TBA */}
-        <p className="mt-6 inline-flex flex-wrap items-center justify-center gap-x-2 rounded-full border border-amber-300 bg-amber-100/70 px-4 py-1.5 text-sm font-medium text-stone-700">
-          <CalendarDays className="h-4 w-4 text-amber-700" aria-hidden />
-          <span>October 2 · Foothills Community Park, Shelter A</span>
-          <span className="text-stone-500">· time TBA</span>
-        </p>
-
-        {/* squad lineup portrait — wide slot with dashed-amber fallback */}
-        <div className="mt-10">
+        <div className="mt-4 sm:mt-8">
           <LineupPlaceholder />
         </div>
 
-        {/* three big signup buttons → SignupModal kinds (dog / volunteer / pledge) */}
-        <div className="mx-auto mt-10 flex max-w-md flex-col gap-3">
+        <div className="mx-auto mt-4 flex max-w-md flex-col gap-2.5 sm:mt-8 sm:gap-3">
           <button
             type="button"
             onClick={() => onOpen("dog")}
-            className="flex items-center justify-center gap-3 rounded-full bg-amber-600 px-6 py-4 text-lg font-semibold text-white shadow-sm transition-colors hover:bg-amber-700"
+            className={`${btn} border-transparent bg-amber-600 text-white shadow-sm hover:bg-amber-700`}
           >
             <Dog className="h-5 w-5" aria-hidden />
             I have a dog
@@ -57,7 +64,7 @@ export default function Hero({ onOpen }: HeroProps) {
           <button
             type="button"
             onClick={() => onOpen("volunteer")}
-            className="flex items-center justify-center gap-3 rounded-full border-2 border-amber-600 bg-white/70 px-6 py-4 text-lg font-semibold text-amber-800 transition-colors hover:bg-amber-100"
+            className={`${btn} border-amber-600 bg-transparent text-amber-800 hover:bg-amber-100`}
           >
             <HandHeart className="h-5 w-5" aria-hidden />
             I want to volunteer
@@ -65,23 +72,11 @@ export default function Hero({ onOpen }: HeroProps) {
           <button
             type="button"
             onClick={() => onOpen("pledge")}
-            className="flex items-center justify-center gap-3 rounded-full border border-stone-300 bg-white/60 px-6 py-4 text-lg font-semibold text-stone-700 transition-colors hover:border-amber-400 hover:text-amber-800"
+            className={`${btn} border-amber-600 bg-transparent text-amber-800 hover:bg-amber-100`}
           >
             <HeartHandshake className="h-5 w-5" aria-hidden />
             I want to support
           </button>
-        </div>
-
-        {/* paw trail divider */}
-        <div
-          aria-hidden
-          className="mt-16 flex items-center justify-center gap-6 text-amber-400/70"
-        >
-          <PawPrint className="h-4 w-4 -rotate-12" />
-          <PawPrint className="h-5 w-5 rotate-6" />
-          <PawPrint className="h-6 w-6 text-amber-500" />
-          <PawPrint className="h-5 w-5 -rotate-6" />
-          <PawPrint className="h-4 w-4 rotate-12" />
         </div>
       </div>
     </section>

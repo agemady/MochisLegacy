@@ -25,11 +25,11 @@ import {
  *
  * The landing page no longer renders a tabbed signup section; instead the
  * hero's three buttons open this modal with exactly one form at a time.
- * The dog / volunteer / pledge form bodies below are moved UNCHANGED from
- * SignupTabs.tsx, which was deleted alongside the legacy sections once
- * p1's new App.tsx landed. Each form submits through p7's src/lib/signup.ts RPC wrappers
- * and renders SubmitResult.message verbatim; the pledge form keeps its
- * not-yet-501(c)(3) notice.
+ * The dog / volunteer / pledge form bodies were moved from SignupTabs.tsx
+ * (deleted alongside the legacy sections) and trimmed per the design review
+ * to only the fields needed at signup. Each form submits through p7's
+ * src/lib/signup.ts RPC wrappers and renders SubmitResult.message verbatim;
+ * the pledge form keeps its not-yet-501(c)(3) notice.
  *
  * Accessibility: renders nothing when `kind` is null; otherwise a
  * role="dialog" overlay that closes on Escape, on backdrop mousedown, or
@@ -44,36 +44,27 @@ const KIND_META: Record<
   { label: string; blurb: string; icon: LucideIcon }
 > = {
   dog: {
-    label: "Register a dog",
+    label: "Join with your dog",
     blurb:
-      "Tell us about you and your dog — we’ll reach out about next steps.",
+      "Tell us about you and your dog — signing up joins the Gaggle of Goldens community walks, the first step toward therapy work.",
     icon: Dog,
   },
   volunteer: {
-    label: "Volunteer",
-    blurb: "Lend a hand at events and visits — no experience required.",
-    icon: HeartHandshake,
+    label: "Lend a hand",
+    blurb:
+      "Tell us who you are and how you’d like to help — no dog and no experience needed.",
+    icon: HandHeart,
   },
   pledge: {
-    label: "Pledge support",
-    blurb: "Back the mission — every pledge helps us plan with confidence.",
-    icon: HandHeart,
+    label: "Back the mission",
+    blurb:
+      "Pledges help us plan the launch with confidence — we’re not yet a 501(c)(3), so pledges are not tax-deductible.",
+    icon: HeartHandshake,
   },
 };
 
-const SKILL_OPTIONS = [
-  "Event help",
-  "Dog handling",
-  "Photography",
-  "Community outreach",
-  "Fundraising",
-  "Other",
-];
-
-const AVAILABILITY_OPTIONS = ["Weekdays", "Weekends", "Evenings", "Flexible"];
-
 const inputCls =
-  "mt-1.5 w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30";
+  "mt-1.5 w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30";
 
 const labelCls = "block text-sm font-medium text-stone-700";
 
@@ -131,10 +122,6 @@ function DogForm() {
           ownerName: String(f.get("ownerName")).trim(),
           email: String(f.get("email")).trim(),
           dogName: String(f.get("dogName")).trim(),
-          phone: String(f.get("phone") || "").trim() || undefined,
-          breed: String(f.get("breed") || "").trim() || undefined,
-          age: String(f.get("age") || "").trim() || undefined,
-          city: String(f.get("city") || "").trim() || undefined,
           notes: String(f.get("notes") || "").trim() || undefined,
         }),
       setPending,
@@ -157,24 +144,8 @@ function DogForm() {
           <span className={labelCls}>Your dog&rsquo;s name *</span>
           <input name="dogName" type="text" required className={inputCls} />
         </label>
-        <label>
-          <span className={labelCls}>Phone</span>
-          <input name="phone" type="tel" autoComplete="tel" className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Breed</span>
-          <input name="breed" type="text" placeholder="e.g. golden retriever" className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Age</span>
-          <input name="age" type="text" placeholder="e.g. 4 years" className={inputCls} />
-        </label>
         <label className="sm:col-span-2">
-          <span className={labelCls}>City</span>
-          <input name="city" type="text" autoComplete="address-level2" className={inputCls} />
-        </label>
-        <label className="sm:col-span-2">
-          <span className={labelCls}>Anything we should know?</span>
+          <span className={labelCls}>Anything we should know about your dog?</span>
           <textarea name="notes" rows={3} className={inputCls} />
         </label>
       </div>
@@ -189,15 +160,8 @@ function DogForm() {
 }
 
 function VolunteerForm() {
-  const [skills, setSkills] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SubmitResult | null>(null);
-
-  function toggleSkill(s: string) {
-    setSkills((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
-    );
-  }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -207,9 +171,6 @@ function VolunteerForm() {
         submitVolunteer({
           name: String(f.get("name")).trim(),
           email: String(f.get("email")).trim(),
-          phone: String(f.get("phone") || "").trim() || undefined,
-          skills: skills.length > 0 ? skills : undefined,
-          availability: String(f.get("availability") || "") || undefined,
           interests: String(f.get("interests") || "").trim() || undefined,
         }),
       setPending,
@@ -219,7 +180,7 @@ function VolunteerForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4">
         <label>
           <span className={labelCls}>Your name *</span>
           <input name="name" type="text" required autoComplete="name" className={inputCls} />
@@ -229,50 +190,10 @@ function VolunteerForm() {
           <input name="email" type="email" required autoComplete="email" className={inputCls} />
         </label>
         <label>
-          <span className={labelCls}>Phone</span>
-          <input name="phone" type="tel" autoComplete="tel" className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Availability</span>
-          <select name="availability" className={inputCls} defaultValue="">
-            <option value="">Select…</option>
-            {AVAILABILITY_OPTIONS.map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </select>
+          <span className={labelCls}>How would you like to help?</span>
+          <textarea name="interests" rows={3} className={inputCls} />
         </label>
       </div>
-
-      <fieldset className="mt-4">
-        <legend className={labelCls}>How can you help?</legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {SKILL_OPTIONS.map((s) => {
-            const active = skills.includes(s);
-            return (
-              <button
-                key={s}
-                type="button"
-                aria-pressed={active}
-                onClick={() => toggleSkill(s)}
-                className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "border-amber-600 bg-amber-600 text-white shadow-sm"
-                    : "border-stone-300 bg-white text-stone-600 hover:border-amber-400 hover:text-amber-800"
-                }`}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
-
-      <label className="mt-4 block">
-        <span className={labelCls}>Tell us more</span>
-        <textarea name="interests" rows={3} className={inputCls} />
-      </label>
 
       <div className="mt-5 flex flex-col items-start gap-3">
         <button type="submit" disabled={pending} className={submitBtnCls}>
@@ -303,8 +224,6 @@ function PledgeForm() {
             | "monthly"
             | "yearly"
             | undefined,
-          visitRequest: String(f.get("visitRequest") || "").trim() || undefined,
-          message: String(f.get("message") || "").trim() || undefined,
         }),
       setPending,
       setResult,
@@ -313,14 +232,6 @@ function PledgeForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
-        <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-        <p>
-          Mochi&rsquo;s Legacy is not yet a 501(c)(3) organization — pledges
-          are not tax-deductible at this time.
-        </p>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
           <span className={labelCls}>Your name *</span>
@@ -353,21 +264,7 @@ function PledgeForm() {
           <select name="frequency" className={inputCls} defaultValue="one-time">
             <option value="one-time">One-time</option>
             <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
           </select>
-        </label>
-        <label className="sm:col-span-2">
-          <span className={labelCls}>Visit request</span>
-          <input
-            name="visitRequest"
-            type="text"
-            placeholder="e.g. a senior living community or community event"
-            className={inputCls}
-          />
-        </label>
-        <label className="sm:col-span-2">
-          <span className={labelCls}>Anything else?</span>
-          <textarea name="message" rows={3} className={inputCls} />
         </label>
       </div>
 
@@ -444,7 +341,7 @@ export default function SignupModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-stone-900/60 sm:items-center sm:p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -455,9 +352,9 @@ export default function SignupModal({
         aria-modal="true"
         aria-labelledby="signup-modal-title"
         onKeyDown={trapTab}
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl sm:p-8"
+        className="flex h-[100dvh] w-full max-w-2xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl"
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex shrink-0 items-start justify-between gap-4 p-6 pb-3 sm:p-8 sm:pb-3">
           <div className="flex items-center gap-2.5">
             <Icon className="h-5 w-5 text-amber-600" aria-hidden />
             <h2
@@ -471,19 +368,28 @@ export default function SignupModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full p-1.5 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
+            className="rounded-full p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
-        <p className="mb-5 mt-2 text-sm leading-relaxed text-stone-600">
-          {meta.blurb}
-        </p>
+        <div className="min-h-0 flex-1 overflow-y-auto p-6 pt-1 sm:p-8 sm:pt-1">
+          {kind === "pledge" ? (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
+              <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <p>{meta.blurb}</p>
+            </div>
+          ) : (
+            <p className="mb-5 text-sm leading-relaxed text-stone-600">
+              {meta.blurb}
+            </p>
+          )}
 
-        {kind === "dog" && <DogForm />}
-        {kind === "volunteer" && <VolunteerForm />}
-        {kind === "pledge" && <PledgeForm />}
+          {kind === "dog" && <DogForm />}
+          {kind === "volunteer" && <VolunteerForm />}
+          {kind === "pledge" && <PledgeForm />}
+        </div>
       </div>
     </div>
   );

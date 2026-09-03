@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "vitest run",
     "preview": "vite preview",
-    "test": "vitest run"
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@oxlint/binding-win32-x64-msvc": "^1.81.0",
+    "@playwright/test": "^1.57.0",
     "@rolldown/binding-win32-x64-msvc": "^1.2.7",
     "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
@@ -29,7 +31,7 @@
     "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2",
-    "vitest": "^4.1.11"
+    "vitest": "^4.0.15",
+    "vite": "^8.2.2"
   }
 }
