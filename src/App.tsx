@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import SignupModal, { type SignupKind } from "./components/forms/SignupModal";
 import Roster from "./components/Roster";
+
+// Scheduler routes are lazy so the landing bundle stays small (S-shell).
+const SchedulePage = lazy(() => import("./components/schedule/SchedulePage"));
+const CheckinPage = lazy(() => import("./pages/CheckinPage"));
 
 /**
  * App composition (pane w2:p1) — ruling 7 single-screen landing.
@@ -32,8 +36,23 @@ export default function App() {
   };
 
   // Unlisted dog-roster page — no nav link from the landing (ruling 7).
-  if (window.location.pathname.replace(/\/+$/, "") === "/roster") {
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+  if (pathname === "/roster") {
     return <Roster />;
+  }
+
+  // Scheduler routes (S-shell). Exact pathname match only; email/SMS auth
+  // callbacks (?code= / #access_token) land on /schedule and supabase-js
+  // consumes them via detectSessionInUrl, then onAuthStateChange updates the
+  // session — no extra handling needed here.
+  if (pathname === "/schedule" || pathname === "/checkin") {
+    return (
+      <Suspense fallback={null}>
+        <div className="min-h-screen bg-amber-50 text-stone-800">
+          {pathname === "/schedule" ? <SchedulePage /> : <CheckinPage />}
+        </div>
+      </Suspense>
+    );
   }
 
   return (
