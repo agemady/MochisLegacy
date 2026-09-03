@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, scheduling]
   pull_request:
-    branches: [main]
+    branches: [main, scheduling]
 
 jobs:
   ci:
@@ -22,14 +22,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Build
-        run: npm run build
-
-      - name: Unit tests
-        run: npm test
+      - name: Check (lint, unit tests, build)
+        run: npm run check
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium

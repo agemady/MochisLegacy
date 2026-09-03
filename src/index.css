@@ -4,6 +4,8 @@
   --animate-fade-up: fade-up 0.65s ease-out both;
   --font-display: "Fraunces", Georgia, serif;
   --color-ground: #fdfbf7;
+  --color-cream-soft: #fff8eb;
+  --color-butter: #fff3d6;
   --color-espresso: #29180c;
   --color-umber: #6b5545;
   --color-honey: #d97706;
@@ -23,35 +25,24 @@
   }
 }
 
-@keyframes tail-wag {
-  50% {
-    transform: rotate(14deg);
-  }
-}
-
 @layer base {
   html {
     min-height: 100%;
     background-color: #fdfbf7;
     background-image:
-      radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.28) 0%, rgba(253, 251, 247, 0) 65%),
-      radial-gradient(#d97706 0.75px, transparent 0.75px);
-    background-size: 100% 100%, 28px 28px;
+      radial-gradient(
+        ellipse 70% 60% at 50% -12%,
+        rgba(251, 191, 36, 0.38) 0%,
+        rgba(251, 191, 36, 0.14) 45%,
+        rgba(253, 251, 247, 0) 72%
+      ),
+      radial-gradient(#d97706 0.9px, transparent 0.9px);
+    background-size: 100% 820px, 28px 28px;
+    background-repeat: no-repeat, repeat;
   }
 
   body {
     color: #29180c;
     background: transparent;
-  }
-
-  #root > .min-h-screen {
-    background-color: transparent;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .squad:hover .squad-tail {
-    animation: tail-wag 0.45s ease-in-out infinite;
-    transform-origin: 8px 18px;
   }
 }

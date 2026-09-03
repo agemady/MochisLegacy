@@ -9,8 +9,10 @@
     "lint": "oxlint",
     "test": "vitest run",
     "preview": "vite preview",
-    "e2e": "playwright test",
-    "og": "playwright test e2e/og.spec.ts"
+    "e2e": "node node_modules/playwright/cli.js test",
+    "shots": "node node_modules/playwright/cli.js test e2e/screenshots.spec.ts",
+    "og": "playwright test e2e/og.spec.ts",
+    "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",

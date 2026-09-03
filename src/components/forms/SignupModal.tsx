@@ -1,18 +1,5 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type KeyboardEvent,
-} from "react";
-import {
-  Dog,
-  HandHeart,
-  HeartHandshake,
-  PawPrint,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { PawPrint, X } from "lucide-react";
 import {
   submitDogSignup,
   submitPledge,
@@ -22,59 +9,43 @@ import {
 } from "../../lib/signup";
 
 /**
- * SignupModal — single-screen-landing signup dialog (pane w2:p4, ruling 7).
- *
- * The landing page no longer renders a tabbed signup section; instead the
- * hero's three buttons open this modal with exactly one form at a time.
- * The dog / volunteer / pledge form bodies were moved from SignupTabs.tsx
- * (deleted alongside the legacy sections) and trimmed per the design review
- * to only the fields needed at signup. Each form submits through p7's
- * src/lib/signup.ts RPC wrappers and renders SubmitResult.message verbatim;
- * the pledge form keeps its not-yet-501(c)(3) notice.
- *
- * On a successful submit the form body is replaced by a warm thank-you
- * card, so the form cannot be resubmitted (a double-tap on mobile cannot
- * create a duplicate row); demo results say plainly that nothing was
- * saved. Server error messages are rendered verbatim.
- *
- * Accessibility: renders nothing when `kind` is null; otherwise a
- * role="dialog" overlay that closes on Escape, on backdrop mousedown, or
- * via the close button, autofocuses the first field, and traps Tab focus
- * while open.
+ * SignupModal — signup dialog for the single-screen landing (ruling 7).
+ * One form at a time (dog / volunteer / pledge), submitted through
+ * src/lib/signup.ts; a successful submit swaps the form body for a
+ * thank-you card so a double-tap cannot create a duplicate row.
+ * A native <dialog> provides focus trapping and Escape handling;
+ * "close" (Escape, backdrop, or buttons) is the single close path.
  */
 
 export type SignupKind = "dog" | "volunteer" | "pledge";
 
-const KIND_META: Record<
-  SignupKind,
-  { label: string; blurb: string; icon: LucideIcon }
-> = {
+const KIND_META: Record<SignupKind, { label: string; blurb: string; action: string }> = {
   dog: {
     label: "Join with your dog",
     blurb:
       "Tell us about you and your dog — signing up joins the Gaggle of Goldens community walks, the first step toward therapy work.",
-    icon: Dog,
+    action: "Join with my dog",
   },
   volunteer: {
     label: "Lend a hand",
     blurb:
       "Tell us who you are and how you’d like to help — no dog and no experience needed; we’ll find you a job that fits.",
-    icon: HandHeart,
+    action: "Volunteer with us",
   },
   pledge: {
     label: "Back the mission",
     blurb: "Pledges help us plan the launch with confidence.",
-    icon: HeartHandshake,
+    action: "Back the mission",
   },
 };
 
 const inputCls =
-  "mt-1.5 w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30";
+  "mt-1.5 w-full rounded-2xl border border-[#E6CCA0] bg-white px-4 py-3 text-base text-espresso shadow-xs placeholder:text-umber/50 focus:border-honey focus:outline-none focus:ring-3 focus:ring-honey/25";
 
-const labelCls = "block text-sm font-medium text-stone-700";
+const labelCls = "block text-sm font-semibold text-espresso";
 
 const submitBtnCls =
-  "inline-flex items-center justify-center gap-2 rounded-full bg-amber-600 px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-honey to-honey-dark px-8 py-3.5 font-bold text-white shadow-[0_6px_18px_-3px_rgba(217,119,6,0.45)] motion-safe:transition-all motion-safe:hover:-translate-y-0.5 sm:w-auto disabled:opacity-50";
 
 // Error-only: successful submissions swap the form body for a SuccessCard.
 function FormStatus({ result }: { result: SubmitResult | null }) {
@@ -89,32 +60,23 @@ function FormStatus({ result }: { result: SubmitResult | null }) {
   );
 }
 
-function SuccessCard({
-  result,
-  onClose,
-}: {
-  result: SubmitResult;
-  onClose: () => void;
-}) {
+function SuccessCard({ result, onClose }: { result: SubmitResult; onClose: () => void }) {
   return (
-    <div
-      role="status"
-      className="flex flex-col items-center gap-3 py-8 text-center"
-    >
-      <PawPrint className="h-10 w-10 text-amber-600" aria-hidden />
-      <p className="text-xl font-semibold text-stone-800">You&rsquo;re in!</p>
-      <p className="max-w-sm text-sm leading-relaxed text-stone-600">
-        {result.message}
-      </p>
+    <div role="status" className="flex flex-col items-center gap-3 py-8 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-full border border-sandstone bg-[#fff3d6] text-honey">
+        <PawPrint className="h-8 w-8" aria-hidden />
+      </span>
+      <p className="font-display text-3xl font-bold text-espresso">You&rsquo;re on the team!</p>
+      <p className="max-w-sm text-sm leading-relaxed text-umber">{result.message}</p>
       {result.demo && (
-        <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
+        <p className="text-xs font-medium uppercase tracking-wide text-umber/70">
           Demo run — nothing was saved
         </p>
       )}
       <button
         type="button"
         onClick={onClose}
-        className="mt-2 rounded-full border border-stone-300 px-6 py-2.5 font-semibold text-stone-700 transition-colors hover:bg-stone-50"
+        className="mt-2 rounded-full border-2 border-[#E6CCA0] bg-white px-8 py-2.5 font-bold text-espresso transition-colors hover:bg-[#fff8eb]"
       >
         Close
       </button>
@@ -142,178 +104,87 @@ async function runSubmit(
   }
 }
 
-function DogForm({ onClose }: { onClose: () => void }) {
-  const [pending, setPending] = useState(false);
-  const [result, setResult] = useState<SubmitResult | null>(null);
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    void runSubmit(
-      () =>
-        submitDogSignup({
-          ownerName: String(f.get("ownerName")).trim(),
-          email: String(f.get("email")).trim(),
-          dogName: String(f.get("dogName")).trim(),
-          notes: String(f.get("notes") || "").trim() || undefined,
-        }),
-      setPending,
-      setResult,
-    );
-  }
-
-  if (result?.ok) return <SuccessCard result={result} onClose={onClose} />;
-
+function DogFields() {
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label>
-          <span className={labelCls}>Your name *</span>
-          <input name="ownerName" type="text" required autoComplete="name" maxLength={120} className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Email *</span>
-          <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Your dog&rsquo;s name *</span>
-          <input name="dogName" type="text" required maxLength={60} className={inputCls} />
-        </label>
-        <label className="sm:col-span-2">
-          <span className={labelCls}>Anything we should know about your dog?</span>
-          <textarea name="notes" rows={3} maxLength={2000} className={inputCls} />
-        </label>
-      </div>
-      <div className="mt-5 flex flex-col items-start gap-3">
-        <button type="submit" disabled={pending} className={submitBtnCls}>
-          {pending ? "Sending…" : "Join with my dog"}
-        </button>
-        <FormStatus result={result} />
-      </div>
-    </form>
+    <fieldset className="grid gap-4 sm:grid-cols-2">
+      <label>
+        <span className={labelCls}>Your name *</span>
+        <input name="ownerName" type="text" required autoComplete="name" maxLength={120} autoFocus className={inputCls} />
+      </label>
+      <label>
+        <span className={labelCls}>Email *</span>
+        <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
+      </label>
+      <label>
+        <span className={labelCls}>Your dog&rsquo;s name *</span>
+        <input name="dogName" type="text" required maxLength={60} className={inputCls} />
+      </label>
+      <label className="sm:col-span-2">
+        <span className={labelCls}>Anything we should know about your dog?</span>
+        <textarea name="notes" rows={3} maxLength={2000} className={inputCls} />
+      </label>
+    </fieldset>
   );
 }
 
-function VolunteerForm({ onClose }: { onClose: () => void }) {
-  const [pending, setPending] = useState(false);
-  const [result, setResult] = useState<SubmitResult | null>(null);
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    void runSubmit(
-      () =>
-        submitVolunteer({
-          name: String(f.get("name")).trim(),
-          email: String(f.get("email")).trim(),
-          interests: String(f.get("interests") || "").trim() || undefined,
-        }),
-      setPending,
-      setResult,
-    );
-  }
-
-  if (result?.ok) return <SuccessCard result={result} onClose={onClose} />;
-
+function VolunteerFields() {
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid gap-4">
-        <label>
-          <span className={labelCls}>Your name *</span>
-          <input name="name" type="text" required autoComplete="name" maxLength={120} className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Email *</span>
-          <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>How would you like to help?</span>
-          <textarea name="interests" rows={3} maxLength={2000} className={inputCls} />
-        </label>
-      </div>
-
-      <div className="mt-5 flex flex-col items-start gap-3">
-        <button type="submit" disabled={pending} className={submitBtnCls}>
-          {pending ? "Sending…" : "Volunteer with us"}
-        </button>
-        <FormStatus result={result} />
-      </div>
-    </form>
+    <fieldset className="grid gap-4">
+      <label>
+        <span className={labelCls}>Your name *</span>
+        <input name="name" type="text" required autoComplete="name" maxLength={120} autoFocus className={inputCls} />
+      </label>
+      <label>
+        <span className={labelCls}>Email *</span>
+        <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
+      </label>
+      <label>
+        <span className={labelCls}>How would you like to help?</span>
+        <textarea name="interests" rows={3} maxLength={2000} className={inputCls} />
+      </label>
+    </fieldset>
   );
 }
 
-function PledgeForm({ onClose }: { onClose: () => void }) {
-  const [amount, setAmount] = useState("");
-  const [pending, setPending] = useState(false);
-  const [result, setResult] = useState<SubmitResult | null>(null);
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    void runSubmit(
-      () =>
-        submitPledge({
-          name: String(f.get("name")).trim(),
-          email: String(f.get("email")).trim(),
-          pledgeAmount: amount.trim() === "" ? undefined : Number(amount),
-          frequency: String(f.get("frequency")) as PledgeInput["frequency"],
-        }),
-      setPending,
-      setResult,
-    );
-  }
-
-  if (result?.ok) return <SuccessCard result={result} onClose={onClose} />;
-
+function PledgeFields() {
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label>
-          <span className={labelCls}>Your name *</span>
-          <input name="name" type="text" required autoComplete="name" maxLength={120} className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Email *</span>
-          <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
-        </label>
-        <label>
-          <span className={labelCls}>Pledge amount (USD)</span>
-          <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-stone-400">
-              $
-            </span>
-            <input
-              name="pledgeAmount"
-              type="number"
-              min={0}
-              step={1}
-              maxLength={8}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value.slice(0, 8))}
-              placeholder="25"
-              className={`${inputCls} pl-7`}
-            />
-          </div>
-          <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
-            We&rsquo;re not yet a 501(c)(3), so pledges are not tax-deductible.
-          </p>
-        </label>
-        <label>
-          <span className={labelCls}>Frequency</span>
-          <select name="frequency" className={inputCls} defaultValue="one-time">
-            <option value="one-time">One-time</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </label>
-      </div>
-
-      <div className="mt-5 flex flex-col items-start gap-3">
-        <button type="submit" disabled={pending} className={submitBtnCls}>
-          {pending ? "Sending…" : "Back the mission"}
-        </button>
-        <FormStatus result={result} />
-      </div>
-    </form>
+    <fieldset className="grid gap-4 sm:grid-cols-2">
+      <label>
+        <span className={labelCls}>Your name *</span>
+        <input name="name" type="text" required autoComplete="name" maxLength={120} autoFocus className={inputCls} />
+      </label>
+      <label>
+        <span className={labelCls}>Email *</span>
+        <input name="email" type="email" required autoComplete="email" maxLength={254} className={inputCls} />
+      </label>
+      <label>
+        <span className={labelCls}>Pledge amount (USD)</span>
+        <div className="relative">
+          <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-umber">
+            $
+          </span>
+          <input
+            name="pledgeAmount"
+            type="number"
+            min={0}
+            max={99999999}
+            step={1}
+            placeholder="25"
+            className={`${inputCls} pl-7`}
+          />
+        </div>
+        <p className="mt-1.5 text-xs leading-relaxed text-umber">
+          We&rsquo;re not yet a 501(c)(3), so pledges are not tax-deductible.
+        </p>
+      </label>
+      <label>
+        <span className={labelCls}>Frequency</span>
+        <select name="frequency" className={inputCls} defaultValue="one-time">
+          <option value="one-time">One-time</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </label>
+    </fieldset>
   );
 }
 
@@ -324,105 +195,117 @@ export default function SignupModal({
   kind: SignupKind | null;
   onClose: () => void;
 }) {
-  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const [pending, setPending] = useState(false);
+  const [result, setResult] = useState<SubmitResult | null>(null);
 
-  // Autofocus the first field and lock body scroll while open.
   useEffect(() => {
-    if (!kind) return;
-    dialogRef.current
-      ?.querySelector<HTMLElement>(
-        "input:not([type='hidden']), textarea, select",
-      )
-      ?.focus();
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
+    const dlg = dialogRef.current;
+    if (!dlg) return;
+    if (kind) {
+      setResult(null);
+      if (!dlg.open) dlg.showModal();
+    } else if (dlg.open) {
+      dlg.close();
+    }
   }, [kind]);
 
-  // Close on Escape.
   useEffect(() => {
-    if (!kind) return;
-    function onKeyDown(e: globalThis.KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [kind, onClose]);
+    const dlg = dialogRef.current;
+    if (!dlg) return;
+    dlg.addEventListener("close", onClose);
+    return () => dlg.removeEventListener("close", onClose);
+  }, [onClose]);
 
-  // Keep Tab (and Shift+Tab) cycling inside the dialog.
-  function trapTab(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key !== "Tab" || !dialogRef.current) return;
-    const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    );
-    if (focusables.length === 0) return;
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-    const active = document.activeElement;
-    const inside = dialogRef.current.contains(active);
-    if (e.shiftKey) {
-      if (active === first || !inside) {
-        e.preventDefault();
-        last.focus();
-      }
-    } else if (active === last || !inside) {
-      e.preventDefault();
-      first.focus();
-    }
+  function close() {
+    dialogRef.current?.close();
   }
 
-  if (kind === null) return null;
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!kind) return;
+    const f = new FormData(e.currentTarget);
+    const field = (n: string) => String(f.get(n) ?? "").trim();
+    const send =
+      kind === "dog"
+        ? () =>
+            submitDogSignup({
+              ownerName: field("ownerName"),
+              email: field("email"),
+              dogName: field("dogName"),
+              notes: field("notes") || undefined,
+            })
+        : kind === "volunteer"
+          ? () =>
+              submitVolunteer({
+                name: field("name"),
+                email: field("email"),
+                interests: field("interests") || undefined,
+              })
+          : () =>
+              submitPledge({
+                name: field("name"),
+                email: field("email"),
+                pledgeAmount:
+                  field("pledgeAmount") === "" ? undefined : Number(field("pledgeAmount")),
+                frequency: field("frequency") as PledgeInput["frequency"],
+              });
+    void runSubmit(send, setPending, setResult);
+  }
 
-  const meta = KIND_META[kind];
-  const Icon = meta.icon;
+  const meta = kind ? KIND_META[kind] : null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-stone-900/60 sm:items-center sm:p-4"
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="signup-modal-title"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === dialogRef.current) close();
       }}
+      className="open:flex mb-0 mt-auto h-auto max-h-[92dvh] w-full max-w-2xl flex-col bg-[#fff8eb] ring-1 ring-sandstone shadow-[0_25px_70px_-15px_rgba(41,24,12,0.35)] backdrop:bg-espresso/55 backdrop:backdrop-blur-[2px] rounded-t-3xl sm:m-auto sm:max-h-[90vh] sm:rounded-3xl"
     >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="signup-modal-title"
-        onKeyDown={trapTab}
-        className="flex h-[100dvh] w-full max-w-2xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl"
-      >
-        <div className="flex shrink-0 items-start justify-between gap-4 p-6 pb-3 sm:p-8 sm:pb-3">
-          <div className="flex items-center gap-2.5">
-            <Icon className="h-5 w-5 text-amber-600" aria-hidden />
-            <h2
-              id="signup-modal-title"
-              className="text-2xl font-semibold tracking-tight text-stone-800"
-            >
-              {meta.label}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-full p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
+      <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 sm:px-10 sm:pt-10">
+        <div className="flex items-center gap-2.5">
+          <PawPrint className="h-6 w-6 text-honey" aria-hidden />
+          <h2
+            id="signup-modal-title"
+            className="font-display text-3xl font-bold tracking-tight text-espresso"
           >
-            <X className="h-5 w-5" aria-hidden />
-          </button>
+            {meta?.label}
+          </h2>
         </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto p-6 pt-1 sm:p-8 sm:pt-1">
-          <p className="mb-5 text-sm leading-relaxed text-stone-600">
-            {meta.blurb}
-          </p>
-
-          {kind === "dog" && <DogForm onClose={onClose} />}
-          {kind === "volunteer" && <VolunteerForm onClose={onClose} />}
-          {kind === "pledge" && <PledgeForm onClose={onClose} />}
-        </div>
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Close"
+          className="rounded-full p-2 text-umber/70 transition-colors hover:bg-[#fff3d6] hover:text-espresso"
+        >
+          <X className="h-5 w-5" aria-hidden />
+        </button>
       </div>
-    </div>
+
+      <div className="flex-initial min-h-0 overflow-y-auto px-6 pb-6 pt-3 sm:px-10 sm:pb-10 sm:pt-4">
+        {meta && (
+          <p className="mb-5 text-sm leading-relaxed text-umber">{meta.blurb}</p>
+        )}
+
+        {result?.ok ? (
+          <SuccessCard result={result} onClose={close} />
+        ) : (
+          <form onSubmit={handleSubmit}>
+            {kind === "dog" && <DogFields />}
+            {kind === "volunteer" && <VolunteerFields />}
+            {kind === "pledge" && <PledgeFields />}
+
+            <div className="mt-5 flex flex-col items-start gap-3">
+              <button type="submit" disabled={pending} className={submitBtnCls}>
+                {pending ? "Sending…" : meta?.action}
+              </button>
+              <FormStatus result={result} />
+            </div>
+          </form>
+        )}
+      </div>
+    </dialog>
   );
 }

@@ -1,5 +1,16 @@
 # Plan board
 
+## Stopping point — 2026-09-03 ~08:00Z (session 1 close)
+
+**State.** `main` and `scheduling` pushed to `agemady/MochisLegacy`. Both trees green (`npm run check` on main; lint + 45 tests + build on scheduling). Live previews stay up on http://127.0.0.1:5173 (main) and http://127.0.0.1:5174 (scheduling). Judge close-out score for the landing: **7/10** (`.scratch/review-visual-landing-1.md`, "Round 2 close-out"). Nothing is deployed and no Supabase project exists yet.
+
+**WIP commits to finish first next session** (each was green but mid-slice): `0f86097` chrome rulings 16+19 (p9), `20abb1e` modal ruling 16 (p4), `4367c54` social card (p5), `5c21e3f` `/schedule` ruling 18 (pD), `ae50c8f` schema lazy link (pG). Not started: index.html `data-sky` script (ruling 19, p3), so `?sky=day` is a no-op today.
+
+**Read first next session.** Rulings 16–19 in `AGENT-COORDINATION.md`; the judge's top five (dot grid too loud, placeholder slot too tall, ticket orphan on 390, chips wrap at 1280, glow still a smear); `.scratch/research/SYNTHESIS.md` (ten ranked moves from the research program, plus the moodboard section); `.scratch/brainstorm-schedule-1.md` items not yet landed; the six founder questions relayed at close (walk time, waiver text, QR target and roster emails, SMTP and nudges, founder's note sentence, "promise not a payment").
+
+**Blocked on the founder.** Supabase project + schema apply, Cloudflare Pages deploy, custom SMTP, waiver text, founder's note, the Photoshop lineup portrait.
+
+
 Living plan, partitioned into small slices. One slice = one owner = disjoint paths. Read `AGENT-COORDINATION.md` for rulings and hard rules; this file says who does what next.
 
 **Pull rule.** When your slice lands, take the top **Ready** slice in your lane, append one line to `.scratch/claims.md` (`<pane> claims <id> <UTC time>`), and start. The overseer reconciles the board; if two panes claim the same id, the earlier line wins and the other takes the next one. Never edit this file yourself.

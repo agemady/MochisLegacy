@@ -49,7 +49,7 @@ create table if not exists public.donation_pledges (
 
 create table if not exists public.subscribers (
   id          uuid primary key default gen_random_uuid(),
-  email       text not null unique,
+  email       text not null,
   created_at  timestamptz not null default now()
 );
 
@@ -68,6 +68,13 @@ create index if not exists dog_apps_email_idx on public.dog_applications (email)
 create index if not exists vol_apps_created_at_idx on public.volunteer_applications (created_at desc);
 create index if not exists vol_apps_email_idx on public.volunteer_applications (email);
 create index if not exists pledges_created_at_idx on public.donation_pledges (created_at desc);
+
+alter table public.subscribers drop constraint if exists subscribers_email_key;
+drop index if exists public.subscribers_email_key;
+create unique index if not exists subscribers_email_lower_idx
+  on public.subscribers (lower(email));
+create unique index if not exists dog_apps_email_dog_name_lower_idx
+  on public.dog_applications (lower(email), lower(dog_name));
 
 alter table public.dog_applications       enable row level security;
 alter table public.volunteer_applications enable row level security;
@@ -160,6 +167,8 @@ begin
     nullif(trim(coalesce(p_city, '')), ''),
     nullif(trim(coalesce(p_notes, '')), '')
   )
+  on conflict ((lower(email)), (lower(dog_name))) do update
+    set email = excluded.email
   returning id into v_id;
 
   return v_id;
@@ -277,7 +286,7 @@ declare
 begin
   insert into public.subscribers (email)
   values (v_email)
-  on conflict (email) do update set email = excluded.email
+  on conflict ((lower(email))) do update set email = excluded.email
   returning id into v_id;
 
   return v_id;
