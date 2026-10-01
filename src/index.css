@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --animate-fade-up: fade-up 0.65s ease-out both;
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-chip-in: chip-in 0.5s cubic-bezier(0.25, 0.9, 0.35, 1.25) both;
+  --animate-sheet-up: sheet-up 0.4s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+  --animate-pop-in: pop-in 0.3s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-wag: wag 0.55s ease-in-out;
+  --animate-step: step 0.4s ease-out both;
   --font-display: "Fraunces", Georgia, serif;
   --color-ground: #fdfbf7;
   --color-cream-soft: #fff8eb;
@@ -10,14 +16,41 @@
   --color-umber: #6b5545;
   --color-honey: #d97706;
   --color-honey-dark: #b45309;
+  /* Mission lead-in on the sky band: 4.5:1 or better on every sky. */
+  --color-honey-deep: #9a4507;
   --color-pine: #2c5e43;
+  --color-pine-dark: #234c36;
+  --color-ember: #c23a2b;
+  --color-ember-dark: #a83226;
+  --color-ember-soft: #fbe4de;
   --color-sandstone: #f3d9a2;
+  /* Field borders: 3.2:1 on white so inputs read as inputs (WCAG 1.4.11). */
+  --color-sandstone-deep: #ad8650;
+}
+
+/* Time-of-day sky (ruling 19). index.html sets data-sky before CSS loads;
+   ?sky=day freezes it for screenshots and e2e. Day is the default. */
+:root {
+  --sky-1: #fbdf9c;
+  --sky-2: #fdf0d2;
+}
+:root[data-sky="dawn"] {
+  --sky-1: #f8d2c3;
+  --sky-2: #fce9dd;
+}
+:root[data-sky="dusk"] {
+  --sky-1: #f8caa6;
+  --sky-2: #fce3d0;
+}
+:root[data-sky="night"] {
+  --sky-1: #d9d4ea;
+  --sky-2: #f2ebea;
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(0.5rem);
+    transform: translateY(0.6rem);
   }
   to {
     opacity: 1;
@@ -25,24 +58,146 @@
   }
 }
 
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes wag {
+  25% {
+    transform: rotate(-16deg);
+  }
+  75% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes step {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem) scale(0.6);
+  }
+}
+
 @layer base {
   html {
     min-height: 100%;
-    background-color: #fdfbf7;
-    background-image:
-      radial-gradient(
-        ellipse 70% 60% at 50% -12%,
-        rgba(251, 191, 36, 0.38) 0%,
-        rgba(251, 191, 36, 0.14) 45%,
-        rgba(253, 251, 247, 0) 72%
-      ),
-      radial-gradient(#d97706 0.9px, transparent 0.9px);
-    background-size: 100% 820px, 28px 28px;
-    background-repeat: no-repeat, repeat;
+    background-color: var(--color-ground);
+    /* Sunrise wash: a full-width sky band that settles into the cream ground. */
+    background-image: linear-gradient(
+      180deg,
+      var(--sky-1) 0,
+      var(--sky-2) 11rem,
+      rgb(253 251 247 / 0) 34rem
+    );
+    background-repeat: no-repeat;
   }
 
   body {
-    color: #29180c;
+    color: var(--color-espresso);
     background: transparent;
+  }
+
+  /* Dot grain, kept to the margins: it fades out behind the content column. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(
+      rgb(180 83 9 / 0.2) 1px,
+      transparent 1.5px
+    );
+    background-size: 22px 22px;
+    mask-image: linear-gradient(
+      90deg,
+      #000,
+      transparent 18%,
+      transparent 82%,
+      #000
+    );
+  }
+
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: #fbdf9c;
+    color: var(--color-espresso);
+  }
+}
+
+@layer components {
+  /* Kickoff ticket: punched notches where the stub tears off. The stub sits
+     below on phones and tablets, and to the right from lg up. */
+  .ticket {
+    --notch: 0.7rem;
+    --cut: calc(100% - 3.25rem);
+    mask:
+      radial-gradient(circle var(--notch) at 0 var(--cut), #0000 98%, #000)
+        left / 51% 100% no-repeat,
+      radial-gradient(circle var(--notch) at 100% var(--cut), #0000 98%, #000)
+        right / 51% 100% no-repeat;
+  }
+
+  @media (min-width: 64rem) {
+    .ticket {
+      --cut: calc(100% - 11rem);
+      mask:
+        radial-gradient(circle var(--notch) at var(--cut) 0, #0000 98%, #000)
+          top / 100% 51% no-repeat,
+        radial-gradient(circle var(--notch) at var(--cut) 100%, #0000 98%, #000)
+          bottom / 100% 51% no-repeat;
+    }
+  }
+
+  /* Primary button: a soft highlight that follows the pointer (Hero sets --mx/--my). */
+  .btn-lit {
+    background-image: radial-gradient(
+      9rem circle at var(--mx, 50%) var(--my, -60%),
+      rgb(255 255 255 / 0.16),
+      transparent 70%
+    );
   }
 }

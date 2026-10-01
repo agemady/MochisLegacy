@@ -4,16 +4,29 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Mochi's Legacy is a Boulder, Colorado therapy dog nonprofit bringing joy to senior living communities, schools, and libraries. Meet the squad and get involved." />
-    <meta name="theme-color" content="#FBEFD0" />
+    <meta name="description" content="Mochi’s Legacy is a Boulder, Colorado therapy dog nonprofit bringing joy to senior living communities, schools, and libraries. Meet the squad and get involved." />
+    <meta name="theme-color" content="#FBDF9C" />
     <meta name="color-scheme" content="light" />
+
+    <!-- Time-of-day sky (ruling 19): set before any CSS so the first paint is right.
+         ?sky=dawn|day|dusk|night freezes it (screenshots and e2e use ?sky=day). -->
+    <script>
+      (function () {
+        var tops = { dawn: "#F8D2C3", day: "#FBDF9C", dusk: "#F8CAA6", night: "#D9D4EA" };
+        var asked = new URLSearchParams(location.search).get("sky");
+        var h = new Date().getHours();
+        var sky = Object.prototype.hasOwnProperty.call(tops, asked) ? asked : h >= 5 && h < 9 ? "dawn" : h >= 9 && h < 17 ? "day" : h >= 17 && h < 20 ? "dusk" : "night";
+        document.documentElement.setAttribute("data-sky", sky);
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", tops[sky]);
+      })();
+    </script>
 
     <!-- Fraunces display font: upright 600/700 + italic 400/600 (mission lead-in), variable opsz axis -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
 
-    <title>Mochi's Legacy</title>
+    <title>Mochi’s Legacy</title>
 
     <!-- Structured data: Organization + kickoff Event (ruling 3: October 2 · Foothills Community Park, Shelter A, time TBA) -->
     <script type="application/ld+json">
@@ -57,15 +70,15 @@
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Mochi's Legacy" />
-    <meta property="og:title" content="Mochi's Legacy — Therapy Dog Nonprofit in Boulder, CO" />
+    <meta property="og:site_name" content="Mochi’s Legacy" />
+    <meta property="og:title" content="Mochi’s Legacy — Therapy Dog Nonprofit in Boulder, CO" />
     <meta property="og:description" content="Boulder, Colorado therapy dog nonprofit bringing joy to senior living communities, schools, and libraries. Meet the squad and get involved." />
     <meta property="og:url" content="https://mochislegacy.com/" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:image" content="https://mochislegacy.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Mochi's Legacy — therapy dog nonprofit in Boulder, CO" />
+    <meta property="og:image:alt" content="Mochi’s Legacy — therapy dog nonprofit in Boulder, CO" />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
