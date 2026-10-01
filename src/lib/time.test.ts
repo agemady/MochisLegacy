@@ -50,3 +50,14 @@ describe('startOfWeekMonday', () => {
     )
   })
 })
+
+describe('Denver local time for walk forms', () => {
+  it('round-trips daylight and standard time', async () => {
+    const { denverLocalToIso, isoToDenverLocal, denverDay } = await import('./time')
+    expect(denverLocalToIso('2026-10-02', '09:00')).toBe('2026-10-02T15:00:00.000Z')
+    expect(denverLocalToIso('2026-12-05', '09:30')).toBe('2026-12-05T16:30:00.000Z')
+    expect(isoToDenverLocal('2026-10-02T15:00:00.000Z')).toEqual({ date: '2026-10-02', time: '09:00' })
+    expect(isoToDenverLocal('2026-12-05T16:30:00.000Z')).toEqual({ date: '2026-12-05', time: '09:30' })
+    expect(denverDay('2026-10-03T03:00:00.000Z')).toBe('2026-10-02')
+  })
+})

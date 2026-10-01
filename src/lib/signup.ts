@@ -91,7 +91,7 @@ async function rpc(name: string, args: Record<string, unknown>): Promise<SubmitR
 }
 
 export function submitDogSignup(input: DogSignupInput): Promise<SubmitResult> {
-  return rpc('public_submit_dog_signup', {
+  return rpc('mochi_submit_dog_signup', {
     p_owner_name: input.ownerName,
     p_email: input.email,
     p_phone: input.phone ?? null,
@@ -104,7 +104,7 @@ export function submitDogSignup(input: DogSignupInput): Promise<SubmitResult> {
 }
 
 export function submitVolunteer(input: VolunteerInput): Promise<SubmitResult> {
-  return rpc('public_submit_volunteer', {
+  return rpc('mochi_submit_volunteer', {
     p_name: input.name,
     p_email: input.email,
     p_phone: input.phone ?? null,
@@ -115,7 +115,7 @@ export function submitVolunteer(input: VolunteerInput): Promise<SubmitResult> {
 }
 
 export function submitPledge(input: PledgeInput): Promise<SubmitResult> {
-  return rpc('public_submit_pledge', {
+  return rpc('mochi_submit_pledge', {
     p_name: input.name,
     p_email: input.email,
     p_pledge_amount: input.pledgeAmount ?? null,
@@ -126,5 +126,5 @@ export function submitPledge(input: PledgeInput): Promise<SubmitResult> {
 }
 
 export function subscribe(input: SubscribeInput): Promise<SubmitResult> {
-  return rpc('public_subscribe', { p_email: input.email })
+  return rpc('mochi_subscribe', { p_email: input.email })
 }

@@ -4,9 +4,9 @@ import Footer from "./components/Footer";
 import SignupModal, { type SignupKind } from "./components/forms/SignupModal";
 import Roster from "./components/Roster";
 
-// Scheduler routes are lazy so the landing bundle stays small (S-shell).
+// Scheduler routes are lazy so the landing bundle stays small.
 const SchedulePage = lazy(() => import("./components/schedule/SchedulePage"));
-const CheckinPage = lazy(() => import("./pages/CheckinPage"));
+const AdminPage = lazy(() => import("./components/admin/AdminPage"));
 
 /**
  * App composition (pane w2:p1) — ruling 7 single-screen landing.
@@ -41,16 +41,19 @@ export default function App() {
     return <Roster />;
   }
 
-  // Scheduler routes (S-shell). Exact pathname match only; email/SMS auth
-  // callbacks (?code= / #access_token) land on /schedule and supabase-js
-  // consumes them via detectSessionInUrl, then onAuthStateChange updates the
-  // session — no extra handling needed here.
-  if (pathname === "/schedule" || pathname === "/checkin") {
+  // Scheduler routes. Personal links carry their key in the fragment
+  // (`/schedule#k=…`, `/checkin#k=…`); src/lib/key.ts moves it to storage.
+  if (pathname === "/schedule") {
     return (
       <Suspense fallback={null}>
-        <div className="min-h-screen bg-amber-50 text-stone-800">
-          {pathname === "/schedule" ? <SchedulePage /> : <CheckinPage />}
-        </div>
+        <SchedulePage />
+      </Suspense>
+    );
+  }
+  if (pathname === "/checkin" || pathname === "/admin") {
+    return (
+      <Suspense fallback={null}>
+        <AdminPage />
       </Suspense>
     );
   }

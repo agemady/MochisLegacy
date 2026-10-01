@@ -78,3 +78,31 @@ export function startOfWeekMonday(date: Date): Date {
   const monday = new Date(Date.UTC(ymd.year, ymd.month - 1, ymd.day - back))
   return denverMidnight(monday.getUTCFullYear(), monday.getUTCMonth() + 1, monday.getUTCDate())
 }
+
+/** "2026-10-02" + "09:00" read as America/Denver wall time → UTC ISO string. */
+export function denverLocalToIso(date: string, time: string): string {
+  const [y, m, d] = date.split('-').map(Number)
+  const [hh, mm] = time.split(':').map(Number)
+  const midnight = denverMidnight(y, m, d).getTime()
+  // Walk times never straddle a DST switch (2 AM), so midnight's offset holds.
+  return new Date(midnight + (hh * 60 + mm) * 60_000).toISOString()
+}
+
+/** UTC ISO → { date: "2026-10-02", time: "09:00" } in America/Denver (for form inputs). */
+export function isoToDenverLocal(iso: string): { date: string; time: string } {
+  const p = partsOf(iso, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  })
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` }
+}
+
+/** "2026-10-02" — the America/Denver calendar day of an instant. */
+export function denverDay(value: string | Date): string {
+  const p = partsOf(value, { year: 'numeric', month: '2-digit', day: '2-digit' })
+  return `${p.year}-${p.month}-${p.day}`
+}

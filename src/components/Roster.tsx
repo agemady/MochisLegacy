@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { roster, type RosterDog, type RosterTier } from "../data/roster";
-import { listRosterDogs } from "../lib/schedule";
 import Footer from "./Footer";
 import PageTop from "./PageTop";
 
@@ -32,14 +31,6 @@ function RosterPhoto({ id, name }: { id: string; name: string }) {
 }
 
 export default function Roster() {
-  const [dogs, setDogs] = useState<RosterDog[]>(roster);
-
-  useEffect(() => {
-    void listRosterDogs().then((r) => {
-      if (r.ok && r.data?.length) setDogs(r.data);
-    });
-  }, []);
-
   return (
     <div className="min-h-screen bg-ground text-espresso">
       <main className="mx-auto max-w-5xl px-4 py-16">
@@ -48,7 +39,7 @@ export default function Roster() {
           lede="Gaggle of Goldens community walks are step one; from there a dog can become a therapy candidate and then a certified therapy dog."
         />
         <ul className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {dogs.map((dog: RosterDog) => (
+        {roster.map((dog: RosterDog) => (
             <li
               key={dog.id}
               className="rounded-3xl bg-[#FAF3E6] p-3 ring-1 ring-sandstone shadow-[0_10px_30px_-18px_rgba(41,24,12,0.35)]"
