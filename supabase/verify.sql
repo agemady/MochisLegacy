@@ -1,125 +1,74 @@
--- Mochi's Legacy — verify.sql
+-- Mochi's Legacy — verify.sql (landing interest forms)
 -- Run this in the Supabase SQL editor (as postgres) AFTER schema.sql.
 -- What it proves:
---   1. anon CANNOT select from any of the four tables (permission denied).
---   2. anon CAN call the four submit RPCs (probe rows are inserted).
--- It cleans up after itself: the probe rows are deleted at the end.
+--   1. anon CANNOT select from any of the four interest tables.
+--   2. anon CAN call the four submit functions (probe rows are inserted).
+-- It runs in ONE transaction that ends in ROLLBACK, so probe rows never persist.
 -- If a step fails, the script aborts with an error — read the message.
 
-create extension if not exists "pgcrypto";
-
--- ============================================================
--- 1. anon must be denied direct table access
--- ============================================================
-set role anon;
+begin;
+set local role anon;
 
 do $$
+declare
+  t text;
 begin
-  begin
-    perform * from public.dog_applications;
-    raise exception 'FAIL: anon selected from dog_applications — anon grants leaked!';
-  exception
-    when insufficient_privilege then
-      raise notice 'PASS: anon select on dog_applications denied';
-  end;
+  foreach t in array array[
+    'mochi_dog_applications', 'mochi_volunteer_applications', 'mochi_donation_pledges', 'mochi_subscribers'
+  ] loop
+    begin
+      execute format('select 1 from public.%I limit 1', t);
+      raise exception 'FAIL: anon selected from % — table grants leaked!', t;
+    exception
+      when insufficient_privilege then
+        raise notice 'PASS: anon select on % denied', t;
+    end;
+  end loop;
 end $$;
 
 do $$
+declare
+  v_id uuid;
 begin
-  begin
-    perform * from public.volunteer_applications;
-    raise exception 'FAIL: anon selected from volunteer_applications — anon grants leaked!';
-  exception
-    when insufficient_privilege then
-      raise notice 'PASS: anon select on volunteer_applications denied';
-  end;
-end $$;
-
-do $$
-begin
-  begin
-    perform * from public.donation_pledges;
-    raise exception 'FAIL: anon selected from donation_pledges — anon grants leaked!';
-  exception
-    when insufficient_privilege then
-      raise notice 'PASS: anon select on donation_pledges denied';
-  end;
-end $$;
-
-do $$
-begin
-  begin
-    perform * from public.subscribers;
-    raise exception 'FAIL: anon selected from subscribers — anon grants leaked!';
-  exception
-    when insufficient_privilege then
-      raise notice 'PASS: anon select on subscribers denied';
-  end;
-end $$;
-
--- ============================================================
--- 2. anon must be able to call the four RPCs (probe rows)
---    All probe rows carry the marker "ML-VERIFY-PROBE" or the
---    probe email so they can be found and deleted below.
--- ============================================================
-
-do $$
-declare v_id uuid;
-begin
-  v_id := public.public_submit_dog_signup(
-    p_owner_name => 'ML Verify Probe',
-    p_email      => 'ml-verify-probe@example.com',
+  v_id := public.mochi_submit_dog_signup(
+    p_owner_name => 'Mochi Verify Probe',
+    p_email      => 'mochi-verify-probe@example.com',
     p_dog_name   => 'Probe Pup',
-    p_notes      => 'ML-VERIFY-PROBE dog application'
+    p_notes      => 'MOCHI-VERIFY-PROBE dog application'
   );
-  raise notice 'PASS: public_submit_dog_signup as anon -> %', v_id;
-end $$;
+  raise notice 'PASS: mochi_submit_dog_signup as anon -> %', v_id;
 
-do $$
-declare v_id uuid;
-begin
-  v_id := public.public_submit_volunteer(
-    p_name      => 'ML Verify Probe',
-    p_email     => 'ml-verify-probe@example.com',
+  v_id := public.mochi_submit_volunteer(
+    p_name      => 'Mochi Verify Probe',
+    p_email     => 'mochi-verify-probe@example.com',
     p_skills    => '{walks}',
-    p_interests => 'ML-VERIFY-PROBE volunteer application'
+    p_interests => 'MOCHI-VERIFY-PROBE volunteer application'
   );
-  raise notice 'PASS: public_submit_volunteer as anon -> %', v_id;
-end $$;
+  raise notice 'PASS: mochi_submit_volunteer as anon -> %', v_id;
 
-do $$
-declare v_id uuid;
-begin
-  v_id := public.public_submit_pledge(
-    p_name      => 'ML Verify Probe',
-    p_email     => 'ml-verify-probe@example.com',
+  v_id := public.mochi_submit_pledge(
+    p_name      => 'Mochi Verify Probe',
+    p_email     => 'mochi-verify-probe@example.com',
     p_frequency => 'one-time',
-    p_message   => 'ML-VERIFY-PROBE donation pledge'
+    p_message   => 'MOCHI-VERIFY-PROBE donation pledge'
   );
-  raise notice 'PASS: public_submit_pledge as anon -> %', v_id;
+  raise notice 'PASS: mochi_submit_pledge as anon -> %', v_id;
+
+  v_id := public.mochi_subscribe(p_email => 'mochi-verify-probe@example.com');
+  raise notice 'PASS: mochi_subscribe as anon -> %', v_id;
+
+  begin
+    perform public.mochi_submit_dog_signup('Probe', 'not-an-email', null, 'Pup');
+    raise exception 'FAIL: invalid email accepted';
+  exception when others then
+    if sqlerrm <> 'invalid email address' then raise; end if;
+    raise notice 'PASS: invalid email refused';
+  end;
 end $$;
 
-do $$
-declare v_id uuid;
-begin
-  v_id := public.public_subscribe(
-    p_email => 'ml-verify-probe@example.com'
-  );
-  raise notice 'PASS: public_subscribe as anon -> %', v_id;
-end $$;
-
--- ============================================================
--- 3. back to postgres and delete the probe rows
--- ============================================================
 reset role;
-
-delete from public.dog_applications
-  where email = 'ml-verify-probe@example.com' and notes like 'ML-VERIFY-PROBE%';
-delete from public.volunteer_applications
-  where email = 'ml-verify-probe@example.com' and interests like 'ML-VERIFY-PROBE%';
-delete from public.donation_pledges
-  where email = 'ml-verify-probe@example.com' and message like 'ML-VERIFY-PROBE%';
-delete from public.subscribers
-  where email = 'ml-verify-probe@example.com';
-
-raise notice 'verify.sql complete: anon access locked down, all four RPCs working, probe rows deleted';
+do $$
+begin
+  raise notice 'verify.sql complete: anon locked out of tables, all four submit functions working; rolling back the probe rows';
+end $$;
+rollback;

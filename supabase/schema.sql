@@ -1,10 +1,15 @@
--- Mochi's Legacy — Stage 1 landing schema
--- Four purpose-built tables. Anon has EXECUTE on the four RPCs only.
--- Zero table grants to anon. RLS on. Ops model is Stage 2 (other repo).
+-- Mochi's Legacy — interest schema (landing page signups)
+--
+-- Lives inside a SHARED Supabase project, so every object is prefixed
+-- `mochi_` and nothing here touches tables, functions, roles or auth objects
+-- that belong to other apps. Safe to re-run.
+--
+-- Security model: RLS on, no policies, and no table privileges for anon or
+-- authenticated (Supabase's default privileges would otherwise grant them).
+-- The site reaches these tables only through the four SECURITY DEFINER
+-- submit functions below. Founders read the rows in Studio (Table Editor).
 
-create extension if not exists "pgcrypto";
-
-create table if not exists public.dog_applications (
+create table if not exists public.mochi_dog_applications (
   id          uuid primary key default gen_random_uuid(),
   owner_name  text not null,
   email       text not null,
@@ -15,11 +20,11 @@ create table if not exists public.dog_applications (
   city        text,
   notes       text,
   status      text not null default 'new'
-              check (status in ('new','contacted','approved','archived')),
+              check (status in ('new', 'contacted', 'approved', 'archived')),
   created_at  timestamptz not null default now()
 );
 
-create table if not exists public.volunteer_applications (
+create table if not exists public.mochi_volunteer_applications (
   id            uuid primary key default gen_random_uuid(),
   name          text not null,
   email         text not null,
@@ -28,11 +33,11 @@ create table if not exists public.volunteer_applications (
   interests     text,
   availability  text,
   status        text not null default 'new'
-                check (status in ('new','contacted','approved','archived')),
+                check (status in ('new', 'contacted', 'approved', 'archived')),
   created_at    timestamptz not null default now()
 );
 
-create table if not exists public.donation_pledges (
+create table if not exists public.mochi_donation_pledges (
   id             uuid primary key default gen_random_uuid(),
   name           text not null,
   email          text not null,
@@ -43,70 +48,40 @@ create table if not exists public.donation_pledges (
   message        text,
   deductible     boolean not null default false,
   status         text not null default 'new'
-                 check (status in ('new','contacted','approved','archived')),
+                 check (status in ('new', 'contacted', 'approved', 'archived')),
   created_at     timestamptz not null default now()
 );
 
-create table if not exists public.subscribers (
+create table if not exists public.mochi_subscribers (
   id          uuid primary key default gen_random_uuid(),
   email       text not null,
   created_at  timestamptz not null default now()
 );
 
-alter table public.dog_applications
-  add column if not exists status text not null default 'new'
-  check (status in ('new','contacted','approved','archived'));
-alter table public.volunteer_applications
-  add column if not exists status text not null default 'new'
-  check (status in ('new','contacted','approved','archived'));
-alter table public.donation_pledges
-  add column if not exists status text not null default 'new'
-  check (status in ('new','contacted','approved','archived'));
+create index if not exists mochi_dog_apps_created_at_idx on public.mochi_dog_applications (created_at desc);
+create index if not exists mochi_vol_apps_created_at_idx on public.mochi_volunteer_applications (created_at desc);
+create index if not exists mochi_vol_apps_email_idx on public.mochi_volunteer_applications (email);
+create index if not exists mochi_pledges_created_at_idx on public.mochi_donation_pledges (created_at desc);
+create unique index if not exists mochi_subscribers_email_lower_idx
+  on public.mochi_subscribers (lower(email));
+create unique index if not exists mochi_dog_apps_email_dog_name_lower_idx
+  on public.mochi_dog_applications (lower(email), lower(dog_name));
 
-create index if not exists dog_apps_created_at_idx on public.dog_applications (created_at desc);
-create index if not exists dog_apps_email_idx on public.dog_applications (email);
-create index if not exists vol_apps_created_at_idx on public.volunteer_applications (created_at desc);
-create index if not exists vol_apps_email_idx on public.volunteer_applications (email);
-create index if not exists pledges_created_at_idx on public.donation_pledges (created_at desc);
+alter table public.mochi_dog_applications       enable row level security;
+alter table public.mochi_volunteer_applications enable row level security;
+alter table public.mochi_donation_pledges       enable row level security;
+alter table public.mochi_subscribers            enable row level security;
 
-alter table public.subscribers drop constraint if exists subscribers_email_key;
-drop index if exists public.subscribers_email_key;
-create unique index if not exists subscribers_email_lower_idx
-  on public.subscribers (lower(email));
-create unique index if not exists dog_apps_email_dog_name_lower_idx
-  on public.dog_applications (lower(email), lower(dog_name));
+revoke all on table
+  public.mochi_dog_applications, public.mochi_volunteer_applications,
+  public.mochi_donation_pledges, public.mochi_subscribers
+  from anon, authenticated;
 
-alter table public.dog_applications       enable row level security;
-alter table public.volunteer_applications enable row level security;
-alter table public.donation_pledges       enable row level security;
-alter table public.subscribers            enable row level security;
-
-drop policy if exists "dog_applications_authenticated_all" on public.dog_applications;
-drop policy if exists "volunteer_applications_authenticated_all" on public.volunteer_applications;
-drop policy if exists "donation_pledges_authenticated_all" on public.donation_pledges;
-drop policy if exists "subscribers_authenticated_all" on public.subscribers;
-
-create policy "dog_applications_authenticated_all"
-  on public.dog_applications for all to authenticated using (true) with check (true);
-create policy "volunteer_applications_authenticated_all"
-  on public.volunteer_applications for all to authenticated using (true) with check (true);
-create policy "donation_pledges_authenticated_all"
-  on public.donation_pledges for all to authenticated using (true) with check (true);
-create policy "subscribers_authenticated_all"
-  on public.subscribers for all to authenticated using (true) with check (true);
-
-grant usage on schema public to anon, authenticated;
-grant all on all tables in schema public to authenticated;
-grant all on all sequences in schema public to authenticated;
-revoke all on table public.dog_applications from anon;
-revoke all on table public.volunteer_applications from anon;
-revoke all on table public.donation_pledges from anon;
-revoke all on table public.subscribers from anon;
-
-create or replace function public._assert_email(p_email text)
+create or replace function public.mochi_assert_email(p_email text)
 returns text
 language plpgsql
 immutable
+set search_path = public, pg_temp
 as $$
 declare
   v_email text := lower(trim(p_email));
@@ -121,9 +96,7 @@ begin
 end;
 $$;
 
-drop function if exists public.public_submit_dog_signup;
-
-create or replace function public.public_submit_dog_signup(
+create or replace function public.mochi_submit_dog_signup(
   p_owner_name text,
   p_email      text,
   p_phone      text default null,
@@ -136,11 +109,11 @@ create or replace function public.public_submit_dog_signup(
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_id uuid;
-  v_email text := public._assert_email(p_email);
+  v_email text := public.mochi_assert_email(p_email);
 begin
   if p_owner_name is null or length(trim(p_owner_name)) = 0 then
     raise exception 'owner name is required';
@@ -155,7 +128,7 @@ begin
     raise exception 'a field is too long';
   end if;
 
-  insert into public.dog_applications (
+  insert into public.mochi_dog_applications (
     owner_name, email, phone, dog_name, breed, age, city, notes
   ) values (
     trim(p_owner_name),
@@ -168,16 +141,16 @@ begin
     nullif(trim(coalesce(p_notes, '')), '')
   )
   on conflict ((lower(email)), (lower(dog_name))) do update
-    set email = excluded.email
+    set owner_name = excluded.owner_name,
+        phone      = coalesce(excluded.phone, mochi_dog_applications.phone),
+        notes      = coalesce(excluded.notes, mochi_dog_applications.notes)
   returning id into v_id;
 
   return v_id;
 end;
 $$;
 
-drop function if exists public.public_submit_volunteer;
-
-create or replace function public.public_submit_volunteer(
+create or replace function public.mochi_submit_volunteer(
   p_name         text,
   p_email        text,
   p_phone        text default null,
@@ -188,22 +161,23 @@ create or replace function public.public_submit_volunteer(
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_id uuid;
-  v_email text := public._assert_email(p_email);
+  v_email text := public.mochi_assert_email(p_email);
 begin
   if p_name is null or length(trim(p_name)) = 0 then
     raise exception 'name is required';
   end if;
   if length(p_name) > 120 or length(coalesce(p_phone, '')) > 40
      or length(coalesce(p_interests, '')) > 1000
-     or length(coalesce(p_availability, '')) > 500 then
+     or length(coalesce(p_availability, '')) > 500
+     or coalesce(array_length(p_skills, 1), 0) > 20 then
     raise exception 'a field is too long';
   end if;
 
-  insert into public.volunteer_applications (
+  insert into public.mochi_volunteer_applications (
     name, email, phone, skills, interests, availability
   ) values (
     trim(p_name),
@@ -219,9 +193,7 @@ begin
 end;
 $$;
 
-drop function if exists public.public_submit_pledge;
-
-create or replace function public.public_submit_pledge(
+create or replace function public.mochi_submit_pledge(
   p_name          text,
   p_email         text,
   p_pledge_amount numeric default null,
@@ -232,11 +204,11 @@ create or replace function public.public_submit_pledge(
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_id uuid;
-  v_email text := public._assert_email(p_email);
+  v_email text := public.mochi_assert_email(p_email);
   v_freq text := coalesce(nullif(trim(p_frequency), ''), 'one-time');
 begin
   if p_name is null or length(trim(p_name)) = 0 then
@@ -253,7 +225,7 @@ begin
     raise exception 'a field is too long';
   end if;
 
-  insert into public.donation_pledges (
+  insert into public.mochi_donation_pledges (
     name, email, pledge_amount, frequency, visit_request, message, deductible
   ) values (
     trim(p_name),
@@ -270,21 +242,17 @@ begin
 end;
 $$;
 
-drop function if exists public.public_subscribe;
-
-create or replace function public.public_subscribe(
-  p_email text
-)
+create or replace function public.mochi_subscribe(p_email text)
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_id uuid;
-  v_email text := public._assert_email(p_email);
+  v_email text := public.mochi_assert_email(p_email);
 begin
-  insert into public.subscribers (email)
+  insert into public.mochi_subscribers (email)
   values (v_email)
   on conflict ((lower(email))) do update set email = excluded.email
   returning id into v_id;
@@ -293,15 +261,16 @@ begin
 end;
 $$;
 
-revoke execute on function public._assert_email(text) from public, anon;
-grant execute on function public._assert_email(text) to authenticated;
+-- Supabase grants EXECUTE on new public functions to anon and authenticated by
+-- default, so revoke from them explicitly, then grant back only the four
+-- submit endpoints.
+revoke execute on function public.mochi_assert_email(text) from public, anon, authenticated;
+revoke execute on function public.mochi_submit_dog_signup(text, text, text, text, text, text, text, text) from public, anon, authenticated;
+revoke execute on function public.mochi_submit_volunteer(text, text, text, text[], text, text) from public, anon, authenticated;
+revoke execute on function public.mochi_submit_pledge(text, text, numeric, text, text, text) from public, anon, authenticated;
+revoke execute on function public.mochi_subscribe(text) from public, anon, authenticated;
 
-revoke execute on function public.public_submit_dog_signup(text, text, text, text, text, text, text, text) from public;
-revoke execute on function public.public_submit_volunteer(text, text, text, text[], text, text) from public;
-revoke execute on function public.public_submit_pledge(text, text, numeric, text, text, text) from public;
-revoke execute on function public.public_subscribe(text) from public;
-
-grant execute on function public.public_submit_dog_signup(text, text, text, text, text, text, text, text) to anon, authenticated;
-grant execute on function public.public_submit_volunteer(text, text, text, text[], text, text) to anon, authenticated;
-grant execute on function public.public_submit_pledge(text, text, numeric, text, text, text) to anon, authenticated;
-grant execute on function public.public_subscribe(text) to anon, authenticated;
+grant execute on function public.mochi_submit_dog_signup(text, text, text, text, text, text, text, text) to anon, authenticated;
+grant execute on function public.mochi_submit_volunteer(text, text, text, text[], text, text) to anon, authenticated;
+grant execute on function public.mochi_submit_pledge(text, text, numeric, text, text, text) to anon, authenticated;
+grant execute on function public.mochi_subscribe(text) to anon, authenticated;
