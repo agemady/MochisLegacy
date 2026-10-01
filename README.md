@@ -9,7 +9,7 @@ Landing page (single screen) for **Mochi's Legacy**, a therapy dog nonprofit bas
 - [Vite](https://vite.dev) + React + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
 - [lucide-react](https://lucide.dev) (icons)
-- [Supabase](https://supabase.com) (Postgres + auth — database setup and data export: [`supabase/README.md`](supabase/README.md))
+- [Supabase](https://supabase.com) (Postgres, `mochi_`-prefixed tables in a shared project, reached only through `mochi_*` functions — setup: [`supabase/README.md`](supabase/README.md))
 
 ## Quickstart
 
@@ -26,7 +26,18 @@ npm run dev
 | `VITE_SUPABASE_URL` | Supabase project URL (Dashboard → Project Settings → API) |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
 
-If the Supabase variables are unset, signup forms run in **demo mode**: submissions are validated and acknowledged but not persisted (see `src/lib/supabase.ts` and `src/lib/signup.ts`).
+If the Supabase variables are unset, the dev server runs in **demo mode**: signup forms are acknowledged but not saved, and `/schedule` + `/checkin` run against an in-memory demo world (`src/lib/demo.ts`). A production build without them reports sign-ups as offline instead of faking success.
+
+## Pages
+
+| Path | Who | What |
+|---|---|---|
+| `/` | everyone | landing page; `/#dog`, `/#volunteer`, `/#pledge` open a form |
+| `/schedule` | everyone; owners via their personal link `/schedule#k=…` | gaggle walk calendar; owners sign their dogs up, join the waitlist, opt out |
+| `/checkin` (alias `/admin`) | founders via their admin link `/checkin#k=…` | walk-day check-in, roster + personal links, interest inbox, walks |
+| `/roster` | unlisted | the kickoff dogs |
+
+Demo links (dev server only): owner `/schedule#k=00000000000000000000000000000001`, admin `/checkin#k=0000000000000000000000000000000a`. Founders' how-to: [`docs/scheduling/RUNBOOK.md`](docs/scheduling/RUNBOOK.md).
 
 ## Scripts
 

@@ -1,5 +1,18 @@
 # Plan board
 
+## Session 2 — 2026-10-01 (gaggle walks ready to run)
+
+**State.** Branch `claude/cool-bardeen-7afihw` (off `scheduling`). Ruling 20: the data lives in the founder's existing Supabase project as `mochi_*` tables and functions — **applied and verified live** (every probe in `verify.sql` and `schedule-verify.sql` passed on the project). No Supabase Auth: owners and founders use personal links.
+
+**Shipped on the branch.**
+- Fixed the session-1 bugs: owner opt-out/update failed with "infinite recursion detected in policy" (RLS policies replaced by checked functions); `schedule-verify.sql` could not run (temp-table grant) and now rolls back; `/checkin` was a placeholder; `/schedule` counted only the viewer's own RSVPs and showed waitlisted owners "You're walking!".
+- `/schedule`: public calendar + gaggle interest card; personal-link owner view (multi-walk, multi-dog, waitlist, opt-out, promotion notice).
+- `/checkin` (alias `/admin`): Walk day, Gaggle (owners, dogs, copy/text/email links, new link), Interest (approve dog applications into the roster), Walks (create/edit/publish).
+- Landing: judge's top five + ruling-19 moments (sky, ticket with countdown and walk sign-ups link, two Juni chips, modal success headlines, footer).
+- Data layer `src/lib/{rpc,schedule,admin,demo,key}.ts`; the dev server runs an in-memory demo world (`demo.ts`) with the same rules. Dead magic-link code removed.
+
+**Before the first walk (founder).** Deploy (Cloudflare Pages + the two env vars), open the admin link, set the kickoff time and Publish, add owners/dogs and text their links. Still open: waiver text, founder's note, lineup portrait.
+
 ## Stopping point — 2026-09-03 ~08:00Z (session 1 close)
 
 **State.** `main` and `scheduling` pushed to `agemady/MochisLegacy`. Both trees green (`npm run check` on main; lint + 45 tests + build on scheduling). Live previews stay up on http://127.0.0.1:5173 (main) and http://127.0.0.1:5174 (scheduling). Judge close-out score for the landing: **7/10** (`.scratch/review-visual-landing-1.md`, "Round 2 close-out"). Nothing is deployed and no Supabase project exists yet.

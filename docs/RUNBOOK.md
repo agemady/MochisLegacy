@@ -37,7 +37,11 @@ The two `VITE_SUPABASE_*` secrets go into Cloudflare Pages (both Production and 
 
 ## Read and export signups
 
-Submissions land in four tables in the Supabase dashboard (Table Editor); export any of them via the ⋯ menu → **Export CSV**. Details: [supabase/README.md](../supabase/README.md).
+Signups show up in the founders' tools: open your admin link (`/checkin#k=…`) → **Interest** tab. They also land in the `mochi_dog_applications`, `mochi_volunteer_applications`, `mochi_donation_pledges` and `mochi_subscribers` tables in the Supabase dashboard (Table Editor); export any of them via the ⋯ menu → **Export CSV**. Details: [supabase/README.md](../supabase/README.md).
+
+## Run gaggle walks
+
+Walk sign-ups, personal links and walk-day check-in: [scheduling/RUNBOOK.md](scheduling/RUNBOOK.md).
 
 ## Demo mode (when the secrets are missing)
 

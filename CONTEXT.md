@@ -48,6 +48,14 @@ _Avoid_: owner (when you mean the person working the dog)
 A Track A public gathering. Venue is free text until a Venue entity exists.
 _Avoid_: visit (that's Track B)
 
+**Gaggle walk**:
+A Track A community walk for roster dogs (any tier). Owners sign up per walk; capacity, waitlist and one-walk-a-day are enforced. Stored in `mochi_walks` / `mochi_walk_rsvps`.
+_Avoid_: event (when you mean a walk with RSVPs), class
+
+**Personal link**:
+The private URL that identifies a Person to the scheduler (`/schedule#k=…`; founders `/checkin#k=…`). There are no accounts or passwords; a leaked link is replaced, not reset.
+_Avoid_: login, account, magic link
+
 **Visit**:
 One Team engagement at a Facility. The unit of impact every grant will ask for.
 _Avoid_: event, appointment

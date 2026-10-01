@@ -9,12 +9,11 @@
 ### Goals
 - **Run the first Gaggle walk:** Mobile RSVP and park check-in for October 2 at Foothills Park Shelter A (~15 dogs).
 - **Dog welfare guardrails:** Max 1 walk/day per dog, hard capacity limit with automatic waitlist, and guilt-free 1-tap opt-out.
-- **Minimal ops footprint:** Two technical founders administer walks directly in Supabase Studio; zero bespoke admin CRUD forms.
+- **Minimal ops footprint:** Founders run everything from one phone-friendly tools page (`/checkin`); nobody hand-edits tables in the shared Supabase project (ruling 20).
 
 ### Non-Goals
 - No Track B facility visits, registry certifications (ATD/TDI), or facility partnerships now.
-- No admin walk creation/editing forms (events seeded via Supabase Studio).
-- No promotion RPCs, granular veterinary columns (`bite_history`, `rabies_expiry`), or separate handler entities.
+- No granular veterinary columns (`bite_history`, `rabies_expiry`) or separate handler entities yet.
 - No park-side walk-in intake flow (unvetted dogs spectate only; dog welfare is non-negotiable).
 
 ---
@@ -22,55 +21,50 @@
 ## 2. Actors
 
 1. **Founder / Admin (2 technical founders):**
-   - Seed and configure walks in Supabase Studio.
-   - Run mobile check-in at `/checkin` (gated by `is_admin = true`), verify waivers, and log opt-outs/stress.
+   - Create and publish walks, add owners and dogs, send personal links, triage landing-page interest (`/checkin`).
+   - Run mobile check-in at `/checkin` (admin link: a person with `is_admin = true`), verify waivers, and log opt-outs.
 2. **Dog Owner:**
-   - Authenticated via Supabase Magic Link.
+   - Opens their personal link (no account, no password).
    - Views upcoming walks at `/schedule`, RSVPs their vetted dog, signs waiver per RSVP, and can opt out anytime.
 
 ---
 
-## 3. Data Model (Pointer to `supabase/schedule.sql`)
+## 3. Data Model (pointer to `supabase/schedule.sql`)
 
-The SQL delta is maintained in `supabase/schedule.sql`. It extends the Stage 1 landing schema with **four tables only**:
+The tables live in a **shared** Supabase project (ruling 20), so every object is prefixed `mochi_` and Supabase Auth is not used. Four tables:
 
-1. **`people`**: System humans (owners, founders).
-   - `id` (uuid PK), `auth_user_id` (uuid FK `auth.users`), `name` (text), `email` (text unique), `phone` (text), `is_admin` (boolean default false), `created_at` (timestamptz).
-2. **`dogs`**: Canine unit of care.
-   - `id` (uuid PK), `owner_id` (uuid FK `people`), `call_name` (text), `roster_tier` (text check `roster_tier in ('gaggle', 'candidate', 'therapy')` default `'gaggle'`), `status` (text check `status in ('active', 'paused', 'retired')` default `'active'`), `created_at` (timestamptz).
-3. **`walks`**: Track A community events (seeded in Studio).
-   - `id` (uuid PK), `title` (text), `starts_at` (timestamptz), `duration_min` (int default 60), `meeting_spot` (text), `capacity_dogs` (int default 15), `status` (text check `status in ('draft', 'published', 'completed', 'cancelled')` default `'published'`), `created_at` (timestamptz).
-4. **`walk_rsvps`**: Unified RSVP, waiver, attendance, and welfare record.
-   - `id` (uuid PK), `walk_id` (uuid FK `walks`), `dog_id` (uuid FK `dogs`), `owner_id` (uuid FK `people`), `status` (text check `status in ('confirmed', 'waitlisted', 'checked_in', 'opted_out', 'cancelled')`), `waitlist_position` (int), `waiver_signed` (boolean not null), `photo_consent` (boolean default false), `checked_in_at` (timestamptz), `opted_out_at` (timestamptz), `opt_out_reason` (text), `created_at` (timestamptz).
+1. **`mochi_people`** — owners and founders: `name`, optional `email` (unique, case-insensitive) and `phone`, `is_admin`, and a private 32-hex `access_token` that powers their personal link.
+2. **`mochi_dogs`** — `owner_id`, `name` (unique per owner), `tier` (`gaggle`/`candidate`/`therapy`), `status` (`active`/`retired`).
+3. **`mochi_walks`** — `title`, `starts_at`, `ends_at`, `meeting_spot`, `cap`, `status` (`draft`/`published`/`done`), `notes` shown to owners.
+4. **`mochi_walk_rsvps`** — one row per (walk, dog): `waiver_signed`, `photo_consent`, `joined_at` (queue order), `checked_in_at`, `opted_out_at`, `opted_out_by`.
 
-**Key Constraints & Welfare:**
-- `UNIQUE (walk_id, dog_id)`: Prevents duplicate bookings for the same walk.
-- Daily limit: Max 1 walk/day per dog enforced at RSVP time.
-- Roster promotion: Founders manually insert approved applicants from `dog_applications` into `people` and `dogs` in Supabase Table Editor.
+**Standing is derived, never stored:** active RSVPs ordered by `joined_at` fill the cap; the rest are the waitlist. An opt-out therefore promotes the next dog automatically, and re-joining goes to the back of the line.
+
+**Rules enforced in the database functions:** waiver per RSVP; cap + waitlist; one walk per dog per Mountain-Time day; only active dogs; sign-ups close at the start time; owners touch only their own dogs; admin functions need an admin link.
+
+**Access:** RLS on, no policies, no table grants to `anon`/`authenticated`. The site calls SECURITY DEFINER functions only (`mochi_upcoming_walks`, `mochi_me`, `mochi_rsvp`, `mochi_opt_out`, and `mochi_admin_*`). `supabase/schedule-verify.sql` proves each rule.
 
 ---
 
-## 4. Screens (Mobile-First, 2 Screens)
+## 4. Screens (mobile-first)
 
-### Screen 1: `/schedule` (Owner Walk & RSVP Hub)
-- **Upcoming Walk Card:** Displays Oct 2 walk details (time, 60m duration, Foothills Shelter A pin) and live capacity pill ("X of 15 spots open").
-- **RSVP Modal:** Owner selects their approved dog, completes the required liability waiver checkbox (required per RSVP), toggles photo consent, and confirms.
-  - *Waitlist Default:* If 15 spots are filled, RSVP is saved as `status = 'waitlisted'` with position.
-- **RSVP'd State:** If already registered, shows confirmation banner, meeting directions, what to bring, and a prominent 1-tap red button: **"Opt Out / Cancel Spot"** (instantly releases spot and promotes waitlist #1).
+### `/schedule` (owners; public calendar without a link)
+- Without a link: upcoming published walks (spots pill, Maps link, notes) and a "New here? Come walk with us." card that opens the landing page's dog form (`/#dog`) — the gaggle interest path.
+- With a personal link: "Hi, <name>", every upcoming walk with one row per dog — walking / waitlist #n / not signed up — inline sign-up (required waiver, optional photo consent) and a guilt-free two-tap opt-out.
 
-### Screen 2: `/checkin` (Founder Mobile Ops Roster)
-- **Access:** Gated to authenticated users with `people.is_admin = true`.
-- **Header:** Live walk metrics: **"11 / 15 Checked In · 1 Opted Out"**.
-- **Roster List:** Alphabetical by dog call name showing owner name, phone link, and green "Waiver Signed" badge.
-- **One-Tap Actions:** Big green **[Check In]** button and red **[Opt Out]** button (prompts for quick note: heat, tired, stressed).
+### `/checkin` (founders' tools, alias `/admin`)
+- **Walk day:** walk picker, counters, roster (not-here first), Check in / Undo, Opt out / Restore, paper waiver, add a roster dog.
+- **Gaggle:** add owners and dogs; copy, text or email each person's link; issue a new link.
+- **Interest:** landing-page dog/volunteer/pledge forms; "Add to gaggle" approves a dog application into the roster and shows the link to send.
+- **Walks:** create, edit and publish walks (Mountain Time).
 
 ---
 
-## 5. Auth
+## 5. Access: personal links, not sign-ins
 
-- **Supabase Magic Link (Passwordless Email OTP) for all users** (owners and founders).
-- **Admin Access:** Controlled via `people.is_admin = true`. Founders log in via magic link to their admin emails.
-- **Rationale:** Zero password fatigue in the park; email is already captured at landing intake; zero OAuth app setup/verification fees or mobile browser popup redirect bugs.
+- Every person has a private link: `/schedule#k=<token>` (founders: `/checkin#k=<token>`). The token sits in the URL fragment (never sent to servers or logs) and moves to local storage after the first visit.
+- **Why not magic links:** the shared project's other app enrolls every new Supabase Auth user into itself (an `auth.users` trigger), and magic links also needed custom SMTP before owners could receive them. Links need neither, and founders can text them from the Gaggle tab.
+- A leaked link is replaced from the Gaggle tab ("New link"); the old one stops working immediately.
 
 ---
 

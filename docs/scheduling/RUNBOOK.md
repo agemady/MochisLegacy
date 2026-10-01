@@ -1,44 +1,41 @@
-# Runbook: scheduling (walks, RSVPs, check-in)
+# Runbook: gaggle walks (sign-ups, check-in, roster)
 
-Short, plain instructions for the scheduling feature. For everything else (site basics, roster photos, deploying the site), see the [main runbook](../RUNBOOK.md) and [DEPLOY.md](../DEPLOY.md) — this page doesn't repeat them.
+Short, plain instructions for running walks. Database setup is in [supabase/README.md](../../supabase/README.md); deploying the site is in [DEPLOY.md](../DEPLOY.md).
 
-## One-time setup in Supabase
+## How it works in one paragraph
 
-Open the Supabase SQL editor (as postgres) and run these in order:
+There are no accounts or passwords. Every owner gets a **personal link** (`…/schedule#k=…`) that opens their page: their dogs, upcoming walks, and a button per dog to save a spot or give it up. Founders get an **admin link** (`…/checkin#k=…`) that opens the founders' tools. Anyone can see the walk calendar at `/schedule`; only people with a link can sign a dog up.
 
-1. **`supabase/schedule.sql`** — creates the tables (`people`, `dogs`, `walks`, `walk_rsvps`), row-level security, and the magic-link linking trigger.
-2. **`supabase/schedule-verify.sql`** — runs a battery of checks (who can see what, email linking, capacity limits) and cleans up after itself. It should finish without errors.
-3. **`supabase/schedule-seed.sql`** — adds the founders, the kickoff dogs, and the October 2 walk. **Before running it, replace every `@example.com` email with the real person's email.** Emails are how owners get linked to their accounts (see below), so placeholders won't work.
+## Before a walk
 
-## How owners get connected to their dogs
+1. **Walks tab → New walk** (or edit the draft): date, start and end time (Mountain Time), meeting spot, capacity, and a note owners will see ("Bring a leash, water, and poop bags."). Owners can't see a walk until you press **Publish**.
+2. **Gaggle tab**: make sure every owner and dog who should walk is listed. **Add owner** takes a name, phone/email, and the dog's name.
+3. Send each owner their link: **Text link** (opens your phone's messages with the link filled in) or **Email link**. **Copy link** works for anything else.
+4. Owners open the link, pick their dog, tick the waiver box, and they're in. When the walk is full, new sign-ups join the **waitlist**; if someone gives up a spot, the next dog on the waitlist moves up automatically.
 
-When an owner signs in with a magic link, the system matches their login email to a row in `people` by that same email. If the email in `people` matches, they instantly see their dogs and can RSVP at `/schedule`. If nothing matches, they see no dogs — check the email spelling in the `people` table.
+Rules the site enforces for you: the waiver box for every walk, the capacity, one walk per dog per day, and sign-ups close when the walk starts.
 
-## Make someone an admin
+## New people from the landing page
 
-1. Open the Supabase Studio → Table Editor → `people`.
-2. Find the person's row and set `is_admin` to `true`.
-3. That's it. They can now open `/checkin` on walk day. (The two founders are seeded as admins already.)
+**Interest tab** lists the "I have a dog", volunteer and pledge forms. For a dog you'd like on the roster, press **Add to gaggle** — that creates the owner and the dog, and shows their link buttons right away so you can send it. Use **Mark contacted** / **Archive** to keep the list tidy. (Meet the dog first: the roster is for vetted, friendly, vaccinated dogs.)
 
-## Add a dog for an owner
+## Walk day (`/checkin` on a phone)
 
-Owners are vetted outside the app, so founders add the dog manually:
+- Pick the walk at the top (today's walk is picked for you). The counters show who's here, confirmed, waitlisted and out.
+- **Check in** each dog as they arrive. Tapped the wrong one? **Undo**.
+- **No waiver** badge (a dog a founder added by hand): get the paper waiver signed, then tap **Paper waiver signed**.
+- A dog seems off, tired, or too hot? **Opt out** — no questions, no guilt. Opted out by mistake? **Restore** puts them back in their old place.
+- A roster dog who forgot to sign up: **Add a roster dog to this walk** at the bottom.
+- **A dog that isn't on the roster:** be kind and honest — they're welcome to come say hi without walking today, and they can apply on the landing page. Don't add new dogs at the park.
 
-1. Supabase Studio → Table Editor → `dogs`.
-2. Insert a row: pick the owner under `owner_id`, add the dog's call `name`, set `tier` (`gaggle`, `candidate`, or `therapy`), and `status` = `active`.
-
-The dog appears on the owner's `/schedule` page and in the public roster right away.
-
-## Walk day (`/checkin`)
-
-Open **`/checkin` on a phone** (any admin's login works). For each walk you get:
-
-- **Counters at the top** — how many dogs are checked in, how many opted out, against the walk cap (e.g. 11/15 checked in, 1 opted out).
-- **Alphabetical roster** — each dog shows the owner's name, a tappable phone link, and whether the waiver was signed at RSVP time.
-- **Two buttons per dog** — green **Check In** when they arrive; red **Opt Out** if the owner cancels or the dog seems off. Opting out frees a spot for the waitlist automatically.
-
-**If someone's dog is not on the list:** the dog hasn't been vetted or added yet. Be kind and honest — they're welcome to come spectate today, and they can apply online at the landing page. Do not add dogs at the park.
+Two founders can check in at the same time; the list refreshes itself every 30 seconds.
 
 ## After the walk
 
-Nothing to do. The check-ins and opt-outs are already saved; the rows stay as your record of who came. No cleanup, no exporting.
+Nothing to do: check-ins and opt-outs are already saved. Set the walk to **done** in the Walks tab if you want it off the list.
+
+## If something goes wrong
+
+- **"This link isn't valid"** — the person has an old or mistyped link. Gaggle tab → **New link**, and send it again.
+- **A link was forwarded or a phone was lost** — Gaggle tab → **New link** for that person. The old link stops working immediately.
+- **Site says sign-ups are offline** — the Supabase env vars are missing from the deploy ([DEPLOY.md](../DEPLOY.md)).

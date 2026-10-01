@@ -30,10 +30,11 @@ Set these on the Pages project (**Settings → Environment variables**) for **Pr
 | Name | Value |
 |---|---|
 | `NODE_VERSION` | `22` |
-| `VITE_SUPABASE_URL` | Dedicated Mochi's Legacy project URL (`https://<ref>.supabase.co`) |
+| `VITE_SUPABASE_URL` | URL of the (shared) Supabase project that holds the `mochi_` tables (`https://<ref>.supabase.co`) |
 | `VITE_SUPABASE_ANON_KEY` | That project's **anon public** key |
 
-- The anon key is public by design. It may only `EXECUTE` the signup RPCs. Never add `service_role` (or any other secret) to Pages.
+- The anon key is public by design. For Mochi's tables it may only `EXECUTE` the `mochi_*` functions (see [supabase/README.md](../supabase/README.md)). Never add `service_role` (or any other secret) to Pages.
+- No Supabase Auth settings (site URL, redirect URLs, SMTP) are needed: the scheduler uses personal links, not sign-ins.
 - Do not commit real values. Local copies live in `.env` (gitignored); the shape is in `.env.example`.
 
 ## 3. Attach `mochislegacy.com`
